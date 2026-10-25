@@ -33,10 +33,11 @@ function readTemplate(templateDir, order = SCRIPT_ORDER) {
   return { html: read('explainer.html'), styles: read('styles.css'), scripts };
 }
 
-function assemble({ html, styles, scripts }, title, data, bootCall = '') {
+function assemble({ html, styles, scripts }, title, data, bootCall = '', description = '') {
   // Function replacers stop "$&"-style patterns in the data being interpreted.
   return html
-    .replace('__TITLE__', () => escapeHtml(title))
+    .replaceAll('__TITLE__', () => escapeHtml(title))
+    .replaceAll('__DESCRIPTION__', () => escapeHtml(description))
     .replace('/*__STYLES__*/', () => styles)
     .replace('/*__SCRIPTS__*/', () => `(() => {\n'use strict';\n${scripts}\n${bootCall}\n})();`)
     .replace('__EXPLAINER_DATA__', () => serializeForScript(data));
@@ -51,7 +52,8 @@ function assemble({ html, styles, scripts }, title, data, bootCall = '') {
 export function buildExplainer(data, options = {}) {
   const parts = readTemplate(options.templateDir || TEMPLATE_DIR);
   const title = data && data.meta && data.meta.title ? `${data.meta.title} · Repo Explainer` : 'Repo Explainer';
-  return assemble(parts, title, data, 'boot();');
+  const description = data && data.meta && typeof data.meta.summary === 'string' ? data.meta.summary : '';
+  return assemble(parts, title, data, 'boot();', description);
 }
 
 /**
@@ -62,5 +64,5 @@ export function buildExplainer(data, options = {}) {
 export function buildGallery(kit, options = {}) {
   const order = SCRIPT_ORDER.filter((f) => f !== 'app.js').concat('gallery.js');
   const parts = readTemplate(options.templateDir || TEMPLATE_DIR, order);
-  return assemble(parts, 'Repo Explainer kit', kit, 'bootGallery();');
+  return assemble(parts, 'Repo Explainer kit', kit, 'bootGallery();', 'Icons, colors, components and flow patterns for Repo Explainer.');
 }

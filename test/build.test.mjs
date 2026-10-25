@@ -19,6 +19,7 @@ test('build produces one self-contained page with every placeholder filled', () 
   assert.doesNotMatch(html, /__TITLE__|__EXPLAINER_DATA__|\/\*__STYLES__\*\/|\/\*__SCRIPTS__\*\//);
   assert.match(html, /<title>Taskflow, explained · Repo Explainer<\/title>/);
   assert.match(html, /boot\(\);/);
+  assert.match(html, /<meta name="description" content="A team to-do app\./);
   assert.deepEqual(embeddedJson(html), example);
 });
 
@@ -28,6 +29,7 @@ test('repo content cannot break out of the data script tag', () => {
   assert.equal((html.match(/<\/script>/g) || []).length, 2, 'only the two real closing tags');
   assert.deepEqual(embeddedJson(html), hostile);
   assert.match(html, /<title>&lt;\/script&gt;/);
+  assert.match(html, /<meta property="og:title" content="&lt;\/script&gt;/);
 });
 
 test('replacement patterns in data are inserted literally', () => {

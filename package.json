@@ -14,7 +14,8 @@
     "patterns/",
     "assets/",
     "references/",
-    "SKILL.md"
+    "SKILL.md",
+    "NOTICE"
   ],
   "scripts": {
     "test": "node --test test/*.test.mjs",
@@ -36,7 +37,7 @@
     "sequence-diagram",
     "developer-experience"
   ],
-  "license": "MIT",
+  "license": "Apache-2.0",
   "author": "Cyrus David Pastelero",
   "repository": {
     "type": "git",
