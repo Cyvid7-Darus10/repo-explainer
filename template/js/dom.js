@@ -66,6 +66,11 @@ function on(name, handler) {
   document.addEventListener(`explainer:${name}`, (event) => handler(event.detail));
 }
 
+// Only http(s) links render; anything else (javascript:, data:) becomes text.
+function safeUrl(value) {
+  return typeof value === 'string' && /^https?:\/\//i.test(value.trim()) ? value.trim() : null;
+}
+
 function fileChip(path) {
   return h('span', { class: 'chip chip-file', title: path }, path);
 }

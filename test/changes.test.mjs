@@ -62,3 +62,7 @@ test('collectChanges reads real git history into draft entries', (t) => {
 test('collectChanges fails with the operation name outside a git repo', () => {
   assert.throws(() => collectChanges(tmpdir()), /git log failed/);
 });
+
+test('collectChanges rejects a non-http remote before running git', () => {
+  assert.throws(() => collectChanges(tmpdir(), { remoteUrl: 'javascript:alert(1)' }), /invalid --remote/);
+});

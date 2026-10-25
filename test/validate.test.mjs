@@ -99,3 +99,11 @@ test('with a repo root, every cited path must exist (line suffixes ignored)', ()
   const bad = { ...ok, nodes: [{ ...ok.nodes[0], files: ['src/missing.js'] }] };
   assert.ok(validateExplainer(bad, { repoRoot: fixtureRepo }).errors.some((e) => e.includes('src/missing.js')));
 });
+
+test('change links must be http or https', () => {
+  const data = clone();
+  data.changes[0] = { ...data.changes[0], url: 'javascript:alert(1)' };
+  data.changes[1] = { ...data.changes[1], url: 'https://github.com/o/r/pull/1' };
+  const urlErrors = validateExplainer(data).errors.filter((e) => e.includes('.url'));
+  assert.deepEqual(urlErrors, ['changes[0].url: must start with http:// or https://']);
+});

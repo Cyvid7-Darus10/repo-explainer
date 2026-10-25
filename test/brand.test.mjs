@@ -54,3 +54,8 @@ test('fonts are the open-source substitutes, not proprietary brand fonts', () =>
   assert.doesNotMatch(css, /din-round|feather/i);
   assert.match(css, /Nunito/);
 });
+
+test('links from data go through the http(s) allowlist', () => {
+  assert.doesNotMatch(js, /href: change\.url/);
+  assert.match(js, /href: safeUrl\(/);
+});

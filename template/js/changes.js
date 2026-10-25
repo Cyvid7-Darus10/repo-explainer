@@ -74,8 +74,8 @@ function changeItem(change, nodeIndex) {
     h('article', { class: 'card change-card' },
       h('div', { class: 'change-top' },
         h('span', null, formatDate(change.date)),
-        change.ref && (change.url
-          ? h('a', { class: 'link', href: change.url, target: '_blank', rel: 'noopener noreferrer' }, change.ref)
+        change.ref && (safeUrl(change.url)
+          ? h('a', { class: 'link', href: safeUrl(change.url), target: '_blank', rel: 'noopener noreferrer' }, change.ref)
           : h('span', null, change.ref)),
         h('span', { class: `tag ${isAgent ? 'tag-agent' : 'tag-human'}` }, isAgent ? 'agent' : 'human'),
         change.author && h('span', null, change.author),

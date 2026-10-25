@@ -76,6 +76,7 @@ export function collectChanges(repo, options = {}) {
   const format = `${RECORD}%H${FIELD}%cI${FIELD}%an${FIELD}%s${FIELD}%b${FIELD}`;
   const args = ['log', `--since=${since}`, `-n${limit}`, `--pretty=format:${format}`, '--name-only'];
   if (mergesOnly) args.push('--merges', '--first-parent', '-m');
+  if (remoteUrl && !/^https?:\/\//i.test(remoteUrl)) throw new Error(`invalid --remote "${remoteUrl}": must start with http:// or https://`);
   const commits = parseLog(git(repo, args));
   return commits.map((commit) => {
     const { title, kind, ref } = parseSubject(commit.subject);

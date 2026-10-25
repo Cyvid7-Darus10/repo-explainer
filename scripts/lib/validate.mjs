@@ -105,6 +105,7 @@ function checkChanges(report, changes, nodeIds) {
     if (Number.isNaN(Date.parse(change.date))) report.error(`${path}.date`, 'must be an ISO date');
     checkEnum(report, `${path}.authorType`, change.authorType, AUTHOR_TYPES);
     checkEnum(report, `${path}.kind`, change.kind, CHANGE_KINDS);
+    if (change.url !== undefined && !/^https?:\/\//i.test(String(change.url))) report.error(`${path}.url`, 'must start with http:// or https://');
     if (!isText(change.why)) report.warn(`${path}.why`, 'missing the reason. The "why" is the point of this chapter');
     arr(change.nodes).forEach((id, j) => {
       if (!nodeIds.has(id)) report.error(`${path}.nodes[${j}]`, `"${id}" is not a node id`);
