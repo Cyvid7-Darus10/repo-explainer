@@ -24,8 +24,8 @@ test('scan finds route handlers with file:line and skips node_modules', () => {
 test('scan reports env var names but never their values', () => {
   assert.deepEqual(scan.env.keys, ['API_TOKEN', 'DATABASE_URL']);
   const serialised = JSON.stringify(scan);
-  assert.ok(!serialised.includes('hunter2'));
-  assert.ok(!serialised.includes('super-secret-value'));
+  assert.ok(!serialised.includes('fake-password-for-tests'));
+  assert.ok(!serialised.includes('fake-token-for-tests'));
 });
 
 test('scan lists data files and suggests the backend preset for an API without UI', () => {

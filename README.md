@@ -10,7 +10,7 @@
 <p align="center">
   <a href="https://github.com/Cyvid7-Darus10/repo-explainer/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/Cyvid7-Darus10/repo-explainer/actions/workflows/ci.yml/badge.svg"></a>
   <a href="LICENSE"><img alt="License: Apache 2.0" src="https://img.shields.io/badge/license-Apache%202.0-58cc02"></a>
-  <img alt="Node 18.17 or newer" src="https://img.shields.io/badge/node-%E2%89%A518.17-1cb0f6">
+  <img alt="Node 18.3 or newer" src="https://img.shields.io/badge/node-%E2%89%A518.3-1cb0f6">
   <img alt="Zero dependencies" src="https://img.shields.io/badge/dependencies-0-042c60">
 </p>
 
@@ -85,7 +85,7 @@ npx github:Cyvid7-Darus10/repo-explainer changes ./my-repo --data explainer.json
 npx github:Cyvid7-Darus10/repo-explainer build explainer.json --repo ./my-repo --strict --open
 ```
 
-Needs Node 18.17 or newer. Nothing to install. The output is one HTML file you can commit, attach to a PR, or host anywhere.
+Needs Node 18.3 or newer. Nothing to install. The output is one HTML file you can commit, attach to a PR, or host anywhere.
 
 <details>
 <summary><b>All commands</b></summary>

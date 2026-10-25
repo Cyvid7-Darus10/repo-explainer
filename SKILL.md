@@ -9,7 +9,7 @@ You produce **one self-contained HTML file** that teaches a repo the way Brillia
 
 **You only write data.** The design, components, icons, animation and layout are finished and tested. Your job is to investigate the repo and fill `explainer.json` with true, cited facts. The CLI turns that into the page.
 
-`SKILL_DIR` below means the folder this file is in. Run the CLI with `node "$SKILL_DIR/bin/repo-explainer.mjs" <command>` (Node 18.17+, no install step).
+`SKILL_DIR` below means the folder this file is in. Run the CLI with `node "$SKILL_DIR/bin/repo-explainer.mjs" <command>` (Node 18.3+, no install step).
 
 ## Workflow
 

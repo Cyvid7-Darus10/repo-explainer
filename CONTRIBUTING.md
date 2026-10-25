@@ -10,7 +10,7 @@ cd repo-explainer
 npm run check        # tests + rebuild the example and gallery
 ```
 
-No dependencies to install. Node 18.17 or newer.
+No dependencies to install. Node 18.3 or newer.
 
 ## Where things live
 
