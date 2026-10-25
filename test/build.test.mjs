@@ -53,3 +53,12 @@ test('gallery builds with its own boot and without the explainer boot', () => {
   assert.doesNotMatch(html, /\nboot\(\);/);
   assert.equal(embeddedJson(html).patterns.length, listPatterns().length);
 });
+
+test('placeholder names inside data are never expanded a second time', () => {
+  const data = { meta: { title: 'x __EXPLAINER_DATA__ /*__SCRIPTS__*/', summary: '__TITLE__ "quoted"' } };
+  const html = buildExplainer(data);
+  assert.match(html, /<title>x __EXPLAINER_DATA__ \/\*__SCRIPTS__\*\/ · Repo Explainer<\/title>/);
+  assert.match(html, /<meta name="description" content="__TITLE__ &quot;quoted&quot;">/);
+  assert.equal((html.match(/<script>/g) || []).length, 1, 'no second script block injected');
+  assert.deepEqual(embeddedJson(html), data);
+});

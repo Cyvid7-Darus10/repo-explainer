@@ -33,14 +33,19 @@ function readTemplate(templateDir, order = SCRIPT_ORDER) {
   return { html: read('explainer.html'), styles: read('styles.css'), scripts };
 }
 
+// One pass over the template, so text inserted for one placeholder (say, a
+// title containing "__EXPLAINER_DATA__") is never scanned for another.
+const PLACEHOLDER_PATTERN = /__TITLE__|__DESCRIPTION__|\/\*__STYLES__\*\/|\/\*__SCRIPTS__\*\/|__EXPLAINER_DATA__/g;
+
 function assemble({ html, styles, scripts }, title, data, bootCall = '', description = '') {
-  // Function replacers stop "$&"-style patterns in the data being interpreted.
-  return html
-    .replaceAll('__TITLE__', () => escapeHtml(title))
-    .replaceAll('__DESCRIPTION__', () => escapeHtml(description))
-    .replace('/*__STYLES__*/', () => styles)
-    .replace('/*__SCRIPTS__*/', () => `(() => {\n'use strict';\n${scripts}\n${bootCall}\n})();`)
-    .replace('__EXPLAINER_DATA__', () => serializeForScript(data));
+  const values = {
+    __TITLE__: escapeHtml(title),
+    __DESCRIPTION__: escapeHtml(description),
+    '/*__STYLES__*/': styles,
+    '/*__SCRIPTS__*/': `(() => {\n'use strict';\n${scripts}\n${bootCall}\n})();`,
+    __EXPLAINER_DATA__: serializeForScript(data),
+  };
+  return html.replace(PLACEHOLDER_PATTERN, (match) => values[match]);
 }
 
 /**
