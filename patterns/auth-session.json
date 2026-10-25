@@ -1,0 +1,53 @@
+{
+  "id": "auth-session",
+  "name": "Sign in, then authenticated request",
+  "use": "Login flows: credentials → session/token → later requests checked.",
+  "roles": [
+    "user",
+    "web",
+    "auth",
+    "db"
+  ],
+  "steps": [
+    {
+      "from": "user",
+      "to": "web",
+      "label": "Submits credentials",
+      "kind": "request"
+    },
+    {
+      "from": "web",
+      "to": "auth",
+      "label": "POST /login",
+      "kind": "request"
+    },
+    {
+      "from": "auth",
+      "to": "db",
+      "label": "Look up user, verify hash",
+      "kind": "data"
+    },
+    {
+      "from": "auth",
+      "to": "web",
+      "label": "Set session cookie / token",
+      "kind": "response",
+      "detail": "Note cookie flags (HttpOnly, Secure, SameSite) or token storage.",
+      "why": "Explain why this storage was chosen."
+    },
+    {
+      "from": "web",
+      "to": "auth",
+      "label": "Later request carries session",
+      "kind": "request"
+    },
+    {
+      "from": "auth",
+      "to": "auth",
+      "label": "Verify and attach user",
+      "kind": "internal",
+      "detail": "Where this check lives decides whether a route can forget it."
+    }
+  ],
+  "howToUse": "Copy steps into flows[].steps, rename each role to a real node id, replace labels with this repo's names, and add file:line to every step."
+}

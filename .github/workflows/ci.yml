@@ -1,0 +1,29 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: [18, 20, 22]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+      - run: git config --global user.email ci@example.com && git config --global user.name CI
+      - run: npm run check
+      - name: Example stays valid under --strict
+        run: node bin/repo-explainer.mjs validate examples/taskflow.explainer.json --strict
+      - name: Built files are up to date
+        run: git diff --exit-code -- examples/

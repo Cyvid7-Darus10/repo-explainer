@@ -1,0 +1,1 @@
+{ "name": "mini-app", "scripts": { "dev": "node src/server.js", "test": "node --test" }, "dependencies": { "express": "^4.19.0", "@prisma/client": "^5.0.0" } }

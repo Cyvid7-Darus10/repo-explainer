@@ -1,0 +1,91 @@
+{
+  "id": "mobile-app",
+  "name": "Mobile app",
+  "whenToUse": "iOS, Android, React Native, Flutter or Expo apps.",
+  "layers": [
+    {
+      "id": "user",
+      "label": "User",
+      "color": "blue"
+    },
+    {
+      "id": "screens",
+      "label": "Screens",
+      "color": "green"
+    },
+    {
+      "id": "logic",
+      "label": "State & logic",
+      "color": "navy"
+    },
+    {
+      "id": "device",
+      "label": "Device & storage",
+      "color": "yellow"
+    },
+    {
+      "id": "external",
+      "label": "Network",
+      "color": "pink"
+    }
+  ],
+  "starterNodes": [
+    {
+      "id": "user",
+      "label": "User",
+      "layer": "user",
+      "kind": "user"
+    },
+    {
+      "id": "screens",
+      "label": "Screens",
+      "layer": "screens",
+      "kind": "mobile"
+    },
+    {
+      "id": "viewModel",
+      "label": "View models",
+      "layer": "logic",
+      "kind": "service"
+    },
+    {
+      "id": "storage",
+      "label": "Local storage",
+      "layer": "device",
+      "kind": "storage"
+    },
+    {
+      "id": "api",
+      "label": "Backend API",
+      "layer": "external",
+      "kind": "external"
+    }
+  ],
+  "chapters": [
+    "map",
+    "flows",
+    "changes",
+    "tree",
+    "data",
+    "concepts",
+    "quiz",
+    "glossary",
+    "run"
+  ],
+  "mustTrace": [
+    "App launch to first screen",
+    "The core action, including offline behaviour",
+    "Purchases or push notifications if present"
+  ],
+  "questions": [
+    "What works offline and how does sync resolve conflicts?",
+    "How is navigation structured?",
+    "Which platform APIs are used and where are permissions requested?"
+  ],
+  "patterns": [
+    "page-load",
+    "offline-sync",
+    "optimistic-ui",
+    "auth-session"
+  ]
+}

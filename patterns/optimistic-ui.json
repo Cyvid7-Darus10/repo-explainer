@@ -1,0 +1,39 @@
+{
+  "id": "optimistic-ui",
+  "name": "Optimistic update",
+  "use": "UI changes before the server confirms.",
+  "roles": [
+    "user",
+    "web",
+    "api"
+  ],
+  "steps": [
+    {
+      "from": "user",
+      "to": "web",
+      "label": "Acts (click, toggle)",
+      "kind": "request"
+    },
+    {
+      "from": "web",
+      "to": "web",
+      "label": "Update UI immediately",
+      "kind": "internal",
+      "why": "Feels instant; must be able to roll back."
+    },
+    {
+      "from": "web",
+      "to": "api",
+      "label": "Send mutation",
+      "kind": "request"
+    },
+    {
+      "from": "api",
+      "to": "web",
+      "label": "Confirm or reject",
+      "kind": "response",
+      "detail": "On failure, roll back and show the error."
+    }
+  ],
+  "howToUse": "Copy steps into flows[].steps, rename each role to a real node id, replace labels with this repo's names, and add file:line to every step."
+}

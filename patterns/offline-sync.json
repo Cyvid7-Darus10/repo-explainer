@@ -1,0 +1,39 @@
+{
+  "id": "offline-sync",
+  "name": "Offline write, later sync",
+  "use": "Mobile/local-first apps.",
+  "roles": [
+    "user",
+    "screens",
+    "storage",
+    "api"
+  ],
+  "steps": [
+    {
+      "from": "user",
+      "to": "screens",
+      "label": "Edits while offline",
+      "kind": "request"
+    },
+    {
+      "from": "screens",
+      "to": "storage",
+      "label": "Save locally + mark dirty",
+      "kind": "data"
+    },
+    {
+      "from": "storage",
+      "to": "api",
+      "label": "Sync when online",
+      "kind": "async"
+    },
+    {
+      "from": "api",
+      "to": "storage",
+      "label": "Merge result",
+      "kind": "response",
+      "detail": "Explain the conflict rule (last-write-wins, CRDT, server wins)."
+    }
+  ],
+  "howToUse": "Copy steps into flows[].steps, rename each role to a real node id, replace labels with this repo's names, and add file:line to every step."
+}

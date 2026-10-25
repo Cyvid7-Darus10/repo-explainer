@@ -1,0 +1,4 @@
+model Task {
+  id    String @id
+  title String
+}

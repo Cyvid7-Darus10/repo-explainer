@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 640" width="1280" height="640">
+<rect width="1280" height="640" fill="#ffffff"/>
+<circle cx="1050" cy="320" r="260" fill="#d7ffb8"/>
+<circle cx="1180" cy="120" r="44" fill="#ffc800"/>
+<g transform="translate(96 150) scale(3)"><rect x="2" y="2" width="28" height="28" rx="9" fill="#58cc02"/><path d="M9 21l5-10 4 7 2-3 3 6" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/><circle cx="23" cy="11" r="2.5" fill="#ffc800"/></g>
+<text x="96" y="370" font-family="Nunito, 'Arial Rounded MT Bold', ui-rounded, system-ui, sans-serif" font-size="88" font-weight="900" fill="#58cc02" letter-spacing="-2">Repo Explainer</text>
+<text x="96" y="440" font-family="Nunito, 'Arial Rounded MT Bold', ui-rounded, system-ui, sans-serif" font-size="34" font-weight="700" fill="#4b4b4b">Understand any repo end to end, even when 20 PRs land a day.</text>
+</svg>

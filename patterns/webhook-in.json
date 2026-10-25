@@ -1,0 +1,47 @@
+{
+  "id": "webhook-in",
+  "name": "Incoming webhook",
+  "use": "A third party (Stripe, GitHub, Slack) calls you.",
+  "roles": [
+    "external",
+    "api",
+    "service",
+    "db"
+  ],
+  "steps": [
+    {
+      "from": "external",
+      "to": "api",
+      "label": "POST /webhooks/…",
+      "kind": "async"
+    },
+    {
+      "from": "api",
+      "to": "api",
+      "label": "Verify signature",
+      "kind": "internal",
+      "why": "Without this, anyone can forge events."
+    },
+    {
+      "from": "api",
+      "to": "service",
+      "label": "Handle event type",
+      "kind": "request"
+    },
+    {
+      "from": "service",
+      "to": "db",
+      "label": "Apply change idempotently",
+      "kind": "data",
+      "detail": "Replaying the same event must not double-apply."
+    },
+    {
+      "from": "api",
+      "to": "external",
+      "label": "200 OK quickly",
+      "kind": "response",
+      "detail": "Slow handlers cause the sender to retry."
+    }
+  ],
+  "howToUse": "Copy steps into flows[].steps, rename each role to a real node id, replace labels with this repo's names, and add file:line to every step."
+}

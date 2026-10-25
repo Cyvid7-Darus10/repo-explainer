@@ -1,0 +1,648 @@
+{
+  "$schema": "../references/data-schema.md",
+  "meta": {
+    "title": "Taskflow, explained",
+    "repo": "acme/taskflow",
+    "summary": "A team to-do app. A Next.js web app talks to a small API, which stores tasks in Postgres and hands slow work (emails, webhooks) to a background worker.",
+    "stack": [
+      "Next.js 15",
+      "TypeScript",
+      "Postgres",
+      "Prisma",
+      "BullMQ",
+      "Redis",
+      "Stripe"
+    ],
+    "preset": "fullstack-web",
+    "generatedAt": "2026-10-25",
+    "commit": "9f3c2ab41e"
+  },
+  "layers": [
+    {
+      "id": "client",
+      "label": "Client",
+      "color": "blue"
+    },
+    {
+      "id": "edge",
+      "label": "Edge & API",
+      "color": "green"
+    },
+    {
+      "id": "domain",
+      "label": "Domain",
+      "color": "navy"
+    },
+    {
+      "id": "infra",
+      "label": "Data & infra",
+      "color": "yellow"
+    },
+    {
+      "id": "external",
+      "label": "Outside world",
+      "color": "pink"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "user",
+      "label": "Team member",
+      "layer": "client",
+      "kind": "user",
+      "summary": "Someone using Taskflow in their browser.",
+      "files": []
+    },
+    {
+      "id": "web",
+      "label": "Web app",
+      "layer": "client",
+      "kind": "ui",
+      "tech": "Next.js App Router",
+      "summary": "Pages and React components. Server components fetch data; client components handle forms and optimistic updates.",
+      "files": [
+        "apps/web/app/",
+        "apps/web/components/"
+      ]
+    },
+    {
+      "id": "middleware",
+      "label": "Auth middleware",
+      "layer": "edge",
+      "kind": "auth",
+      "tech": "Next middleware + JWT",
+      "summary": "Runs before every request. Reads the session cookie, rejects anonymous users, and puts the user id on the request.",
+      "files": [
+        "apps/web/middleware.ts"
+      ]
+    },
+    {
+      "id": "api",
+      "label": "Tasks API",
+      "layer": "edge",
+      "kind": "api",
+      "tech": "Route handlers",
+      "summary": "Thin HTTP layer. Parses and validates input with Zod, then calls the task service. Never touches the database directly.",
+      "files": [
+        "apps/web/app/api/tasks/route.ts"
+      ]
+    },
+    {
+      "id": "service",
+      "label": "Task service",
+      "layer": "domain",
+      "kind": "service",
+      "tech": "Plain TypeScript",
+      "summary": "All business rules live here: who can edit a task, what happens when it is completed, which events fire.",
+      "files": [
+        "packages/core/src/tasks/service.ts"
+      ]
+    },
+    {
+      "id": "billing",
+      "label": "Billing service",
+      "layer": "domain",
+      "kind": "service",
+      "tech": "Stripe SDK",
+      "summary": "Checks plan limits (free teams get 50 open tasks) and syncs subscription state from Stripe webhooks.",
+      "files": [
+        "packages/core/src/billing/"
+      ]
+    },
+    {
+      "id": "db",
+      "label": "Postgres",
+      "layer": "infra",
+      "kind": "db",
+      "tech": "Prisma ORM",
+      "summary": "The source of truth for teams, users and tasks.",
+      "files": [
+        "packages/db/prisma/schema.prisma"
+      ]
+    },
+    {
+      "id": "queue",
+      "label": "Job queue",
+      "layer": "infra",
+      "kind": "queue",
+      "tech": "BullMQ on Redis",
+      "summary": "Holds slow work so requests stay fast. Each job is retried 5 times with backoff.",
+      "files": [
+        "packages/core/src/queue.ts"
+      ]
+    },
+    {
+      "id": "worker",
+      "label": "Worker",
+      "layer": "infra",
+      "kind": "job",
+      "tech": "Node process",
+      "summary": "Pulls jobs off the queue: sends emails, fires customer webhooks, rolls up daily stats.",
+      "files": [
+        "apps/worker/src/index.ts"
+      ]
+    },
+    {
+      "id": "email",
+      "label": "Email provider",
+      "layer": "external",
+      "kind": "external",
+      "tech": "Resend",
+      "summary": "Delivers notification emails.",
+      "files": [
+        "apps/worker/src/jobs/send-email.ts"
+      ]
+    },
+    {
+      "id": "stripe",
+      "label": "Stripe",
+      "layer": "external",
+      "kind": "external",
+      "summary": "Payments and subscriptions.",
+      "files": [
+        "apps/web/app/api/stripe/webhook/route.ts"
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "from": "user",
+      "to": "web",
+      "label": "clicks"
+    },
+    {
+      "from": "web",
+      "to": "middleware",
+      "label": "fetch /api/*"
+    },
+    {
+      "from": "middleware",
+      "to": "api",
+      "label": "user id"
+    },
+    {
+      "from": "api",
+      "to": "service",
+      "label": "createTask()"
+    },
+    {
+      "from": "service",
+      "to": "billing",
+      "label": "checkLimit()"
+    },
+    {
+      "from": "service",
+      "to": "db",
+      "label": "insert",
+      "kind": "data"
+    },
+    {
+      "from": "service",
+      "to": "queue",
+      "label": "enqueue",
+      "kind": "async"
+    },
+    {
+      "from": "queue",
+      "to": "worker",
+      "label": "job",
+      "kind": "async"
+    },
+    {
+      "from": "worker",
+      "to": "email",
+      "label": "send"
+    },
+    {
+      "from": "stripe",
+      "to": "billing",
+      "label": "webhook",
+      "kind": "async"
+    }
+  ],
+  "flows": [
+    {
+      "id": "create-task",
+      "title": "Create a task",
+      "trigger": "User presses “Add task”",
+      "summary": "The most common write in the app. Follow it from the click to the email the assignee receives.",
+      "steps": [
+        {
+          "from": "user",
+          "to": "web",
+          "label": "Types a title, presses Add",
+          "kind": "request",
+          "detail": "The form is a client component. It shows the task instantly (optimistic update) before the server answers.",
+          "file": "apps/web/components/new-task-form.tsx:24"
+        },
+        {
+          "from": "web",
+          "to": "api",
+          "label": "POST /api/tasks",
+          "kind": "request",
+          "detail": "A normal fetch with the session cookie attached. The auth middleware runs first: no valid session means a 401 and the request stops.",
+          "file": "apps/web/components/new-task-form.tsx:41",
+          "code": "await fetch('/api/tasks', {\n  method: 'POST',\n  body: JSON.stringify({ title, assigneeId }),\n})",
+          "lang": "ts",
+          "why": "Doing auth once in middleware means no route can forget to check it."
+        },
+        {
+          "from": "api",
+          "to": "service",
+          "label": "Validates, calls createTask()",
+          "kind": "request",
+          "detail": "Zod rejects bad input with a 422 before any business logic runs.",
+          "file": "apps/web/app/api/tasks/route.ts:18",
+          "code": "const input = CreateTask.parse(await req.json())\nconst task = await tasks.createTask(userId, input)\nreturn Response.json(task, { status: 201 })",
+          "lang": "ts"
+        },
+        {
+          "from": "service",
+          "to": "service",
+          "label": "Checks the plan limit",
+          "kind": "internal",
+          "detail": "Free teams can have 50 open tasks. Over the limit, billing.checkLimit() throws and the API answers 402.",
+          "file": "packages/core/src/billing/limits.ts:9"
+        },
+        {
+          "from": "service",
+          "to": "db",
+          "label": "INSERT the task",
+          "kind": "data",
+          "detail": "Inside a transaction together with an activity-log row, so the history can never miss a task.",
+          "file": "packages/core/src/tasks/service.ts:57"
+        },
+        {
+          "from": "service",
+          "to": "queue",
+          "label": "Enqueue “task.assigned”",
+          "kind": "async",
+          "detail": "Only if someone else was assigned. The request does not wait for the email.",
+          "why": "Email providers can take seconds. Queuing keeps the click under 100 ms.",
+          "file": "packages/core/src/tasks/service.ts:71"
+        },
+        {
+          "from": "api",
+          "to": "web",
+          "label": "201 Created",
+          "kind": "response",
+          "detail": "The real task replaces the optimistic one. If anything failed, the form rolls back and shows the error.",
+          "file": "apps/web/app/api/tasks/route.ts:20"
+        },
+        {
+          "from": "queue",
+          "to": "worker",
+          "label": "Worker sends the email",
+          "kind": "async",
+          "detail": "Usually within a second. Failed jobs retry with backoff, then the assignee gets the email.",
+          "file": "apps/worker/src/index.ts:15"
+        }
+      ]
+    },
+    {
+      "id": "upgrade",
+      "title": "Upgrade to Pro",
+      "trigger": "Stripe sends a webhook",
+      "summary": "Payment happens on Stripe’s page. We only learn about it through a webhook.",
+      "steps": [
+        {
+          "from": "stripe",
+          "to": "billing",
+          "label": "checkout.session.completed",
+          "kind": "async",
+          "detail": "The webhook route checks the Stripe signature first, then hands the event to the billing service.",
+          "why": "Without the signature check, anyone could POST a fake ‘paid’ event.",
+          "file": "apps/web/app/api/stripe/webhook/route.ts:10"
+        },
+        {
+          "from": "billing",
+          "to": "db",
+          "label": "Set team.plan = 'pro'",
+          "kind": "data",
+          "detail": "Idempotent: replaying the same event changes nothing.",
+          "file": "packages/core/src/billing/sync.ts:22"
+        },
+        {
+          "from": "billing",
+          "to": "queue",
+          "label": "Enqueue welcome email",
+          "kind": "async",
+          "file": "packages/core/src/billing/sync.ts:30"
+        },
+        {
+          "from": "queue",
+          "to": "worker",
+          "label": "Job runs",
+          "kind": "async",
+          "file": "apps/worker/src/index.ts:15"
+        },
+        {
+          "from": "worker",
+          "to": "email",
+          "label": "“Welcome to Pro”",
+          "kind": "request",
+          "file": "apps/worker/src/jobs/send-email.ts:8"
+        }
+      ]
+    }
+  ],
+  "changes": [
+    {
+      "id": "pr-482",
+      "title": "Move task emails onto the queue",
+      "date": "2026-10-24",
+      "author": "claude-agent",
+      "authorType": "agent",
+      "ref": "#482",
+      "kind": "perf",
+      "what": "createTask() used to call Resend inline. Now it enqueues a job and the worker sends it.",
+      "why": "p95 for POST /api/tasks was 1.8 s because of email latency. It is now 90 ms.",
+      "risk": "Emails can arrive a few seconds late; retries may duplicate an email if the provider times out after sending.",
+      "nodes": [
+        "service",
+        "queue",
+        "worker"
+      ],
+      "files": [
+        "packages/core/src/tasks/service.ts",
+        "apps/worker/src/jobs/send-email.ts"
+      ]
+    },
+    {
+      "id": "pr-479",
+      "title": "Enforce the 50-task limit on the free plan",
+      "date": "2026-10-24",
+      "author": "maria",
+      "authorType": "human",
+      "ref": "#479",
+      "kind": "feat",
+      "what": "New billing.checkLimit() call before every insert, plus a 402 response and an upgrade banner.",
+      "why": "Pricing change agreed for Q4: free stays useful for small teams, heavy users upgrade.",
+      "nodes": [
+        "billing",
+        "service",
+        "api",
+        "web"
+      ],
+      "files": [
+        "packages/core/src/billing/limits.ts"
+      ]
+    },
+    {
+      "id": "pr-475",
+      "title": "Verify Stripe webhook signatures",
+      "date": "2026-10-23",
+      "author": "security-agent",
+      "authorType": "agent",
+      "ref": "#475",
+      "kind": "security",
+      "what": "The webhook route now rejects any request whose Stripe-Signature header does not verify.",
+      "why": "An audit found the endpoint trusted any POST. Anyone could have upgraded a team for free.",
+      "nodes": [
+        "stripe",
+        "billing"
+      ],
+      "files": [
+        "apps/web/app/api/stripe/webhook/route.ts"
+      ]
+    },
+    {
+      "id": "pr-471",
+      "title": "Split auth checks out of route handlers",
+      "date": "2026-10-22",
+      "author": "dev-agent-2",
+      "authorType": "agent",
+      "ref": "#471",
+      "kind": "refactor",
+      "what": "Twelve copies of the session check were replaced by one middleware.",
+      "why": "Two new routes had shipped without auth. One place to check means none can forget.",
+      "nodes": [
+        "middleware",
+        "api"
+      ],
+      "files": [
+        "apps/web/middleware.ts"
+      ]
+    }
+  ],
+  "tree": [
+    {
+      "path": "apps/",
+      "note": "Things you can run"
+    },
+    {
+      "path": "apps/web/",
+      "note": "The Next.js app: pages, components and API routes",
+      "key": true
+    },
+    {
+      "path": "apps/web/app/api/",
+      "note": "HTTP endpoints. Thin: validate, then call packages/core"
+    },
+    {
+      "path": "apps/web/middleware.ts",
+      "note": "Auth for every request"
+    },
+    {
+      "path": "apps/worker/",
+      "note": "Background job runner (emails, webhooks, stats)"
+    },
+    {
+      "path": "packages/",
+      "note": "Shared code, no HTTP in here"
+    },
+    {
+      "path": "packages/core/",
+      "note": "Business rules. Start here to change behaviour",
+      "key": true
+    },
+    {
+      "path": "packages/db/",
+      "note": "Prisma schema and migrations"
+    }
+  ],
+  "dataModel": [
+    {
+      "name": "Team",
+      "summary": "A workspace. Billing lives here.",
+      "fields": [
+        {
+          "name": "id",
+          "type": "uuid"
+        },
+        {
+          "name": "name",
+          "type": "text"
+        },
+        {
+          "name": "plan",
+          "type": "'free' | 'pro'",
+          "note": "Synced from Stripe"
+        },
+        {
+          "name": "stripeCustomerId",
+          "type": "text?"
+        }
+      ],
+      "relations": [
+        {
+          "to": "User",
+          "kind": "has many"
+        },
+        {
+          "to": "Task",
+          "kind": "has many"
+        }
+      ]
+    },
+    {
+      "name": "User",
+      "fields": [
+        {
+          "name": "id",
+          "type": "uuid"
+        },
+        {
+          "name": "email",
+          "type": "text",
+          "note": "Unique"
+        },
+        {
+          "name": "teamId",
+          "type": "uuid"
+        }
+      ],
+      "relations": [
+        {
+          "to": "Team",
+          "kind": "belongs to"
+        }
+      ]
+    },
+    {
+      "name": "Task",
+      "summary": "The thing people actually care about.",
+      "fields": [
+        {
+          "name": "id",
+          "type": "uuid"
+        },
+        {
+          "name": "title",
+          "type": "text"
+        },
+        {
+          "name": "status",
+          "type": "'open' | 'done'"
+        },
+        {
+          "name": "assigneeId",
+          "type": "uuid?",
+          "ref": "User"
+        },
+        {
+          "name": "completedAt",
+          "type": "timestamptz?",
+          "note": "Set by the service, never by the client"
+        }
+      ],
+      "relations": [
+        {
+          "to": "Team",
+          "kind": "belongs to"
+        },
+        {
+          "to": "User",
+          "kind": "assigned to"
+        }
+      ]
+    }
+  ],
+  "concepts": [
+    {
+      "title": "Routes are thin, the service is thick",
+      "body": "API routes only parse input and shape the response. Every rule lives in packages/core: limits, permissions, side effects.",
+      "analogy": "Routes are the waiter: they take the order and bring the plate. The service is the kitchen.",
+      "file": "packages/core/src/tasks/service.ts"
+    },
+    {
+      "title": "Slow things go on the queue",
+      "body": "If something talks to the outside world and the user does not need the result right now, it becomes a job.",
+      "analogy": "Like dropping a letter in a postbox instead of walking it to the recipient.",
+      "code": "await queue.add('task.assigned', { taskId: task.id })",
+      "lang": "ts"
+    },
+    {
+      "title": "Optimistic UI",
+      "body": "The web app shows your change before the server confirms it, then quietly fixes things up if the server disagrees.",
+      "file": "apps/web/components/new-task-form.tsx"
+    }
+  ],
+  "quiz": [
+    {
+      "question": "You need to add a rule: “archived teams can’t create tasks”. Where does it go?",
+      "options": [
+        "apps/web/app/api/tasks/route.ts",
+        "packages/core/src/tasks/service.ts",
+        "apps/web/middleware.ts",
+        "The Prisma schema"
+      ],
+      "answer": 1,
+      "explain": "Business rules belong in the service, so every caller gets them: API, worker and scripts."
+    },
+    {
+      "question": "Why doesn’t creating a task wait for the email to send?",
+      "options": [
+        "Emails are sent by the browser",
+        "The email is queued and the worker sends it later",
+        "Emails are only sent on Pro plans"
+      ],
+      "answer": 1,
+      "explain": "PR #482 moved emails onto the queue, which cut p95 from 1.8 s to 90 ms."
+    },
+    {
+      "question": "What stops someone faking a Stripe ‘payment succeeded’ event?",
+      "options": [
+        "The auth middleware",
+        "Rate limiting",
+        "Webhook signature verification"
+      ],
+      "answer": 2,
+      "explain": "Added in #475 after an audit. The middleware doesn’t run for Stripe, because Stripe has no session cookie."
+    }
+  ],
+  "glossary": [
+    {
+      "term": "Optimistic update",
+      "definition": "Showing a change in the UI before the server confirms it."
+    },
+    {
+      "term": "Job",
+      "definition": "A unit of background work stored in Redis and run by the worker."
+    },
+    {
+      "term": "Plan limit",
+      "definition": "The 50-open-task cap on free teams, enforced in billing/limits.ts."
+    },
+    {
+      "term": "Idempotent",
+      "definition": "Safe to run twice: the second run changes nothing."
+    }
+  ],
+  "runbook": [
+    {
+      "label": "Install",
+      "command": "pnpm install"
+    },
+    {
+      "label": "Start Postgres and Redis",
+      "command": "docker compose up -d db redis",
+      "note": "Needs Docker Desktop running."
+    },
+    {
+      "label": "Run the app and the worker",
+      "command": "pnpm dev",
+      "note": "Web on :3000, worker logs in the same terminal."
+    }
+  ]
+}

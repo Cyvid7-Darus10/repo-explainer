@@ -1,0 +1,78 @@
+{
+  "id": "library-cli",
+  "name": "Library, SDK or CLI",
+  "whenToUse": "Packages, SDKs, command-line tools, compilers and other code without a long-running server.",
+  "layers": [
+    {
+      "id": "caller",
+      "label": "Caller",
+      "color": "blue"
+    },
+    {
+      "id": "surface",
+      "label": "Public surface",
+      "color": "green"
+    },
+    {
+      "id": "core",
+      "label": "Core",
+      "color": "navy"
+    },
+    {
+      "id": "io",
+      "label": "I/O & adapters",
+      "color": "yellow"
+    }
+  ],
+  "starterNodes": [
+    {
+      "id": "caller",
+      "label": "Your code / shell",
+      "layer": "caller",
+      "kind": "user"
+    },
+    {
+      "id": "entry",
+      "label": "Public API / CLI",
+      "layer": "surface",
+      "kind": "cli"
+    },
+    {
+      "id": "core",
+      "label": "Core engine",
+      "layer": "core",
+      "kind": "service"
+    },
+    {
+      "id": "io",
+      "label": "File / network adapters",
+      "layer": "io",
+      "kind": "storage"
+    }
+  ],
+  "chapters": [
+    "map",
+    "flows",
+    "changes",
+    "tree",
+    "concepts",
+    "quiz",
+    "glossary",
+    "run"
+  ],
+  "mustTrace": [
+    "The most common call (or command) from entry point to output",
+    "How errors surface to the caller",
+    "Plugin or extension points if they exist"
+  ],
+  "questions": [
+    "What is public API and what is internal?",
+    "What are the extension points?",
+    "Which parts are pure and which do I/O?"
+  ],
+  "patterns": [
+    "cli-command",
+    "request-response",
+    "validation-error"
+  ]
+}

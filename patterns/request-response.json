@@ -1,0 +1,54 @@
+{
+  "id": "request-response",
+  "name": "Request → response",
+  "use": "Any synchronous read or write through layers.",
+  "roles": [
+    "client",
+    "api",
+    "service",
+    "db"
+  ],
+  "steps": [
+    {
+      "from": "client",
+      "to": "api",
+      "label": "HTTP request",
+      "kind": "request",
+      "detail": "Method, path and body arrive at the router."
+    },
+    {
+      "from": "api",
+      "to": "service",
+      "label": "Validated input",
+      "kind": "request",
+      "detail": "The handler parses input and calls the service."
+    },
+    {
+      "from": "service",
+      "to": "db",
+      "label": "Query",
+      "kind": "data",
+      "detail": "Read or write the rows this action needs."
+    },
+    {
+      "from": "db",
+      "to": "service",
+      "label": "Rows",
+      "kind": "response"
+    },
+    {
+      "from": "service",
+      "to": "api",
+      "label": "Domain result",
+      "kind": "response"
+    },
+    {
+      "from": "api",
+      "to": "client",
+      "label": "JSON response",
+      "kind": "response",
+      "detail": "Status code plus body."
+    }
+  ],
+  "howToUse": "Copy steps into flows[].steps, rename each role to a real node id, replace labels with this repo's names, and add file:line to every step."
+}

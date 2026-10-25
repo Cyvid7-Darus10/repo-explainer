@@ -1,0 +1,53 @@
+{
+  "id": "page-load",
+  "name": "First page load",
+  "use": "Route → data fetching → render, with loading and error states.",
+  "roles": [
+    "user",
+    "router",
+    "pages",
+    "apiClient",
+    "backend"
+  ],
+  "steps": [
+    {
+      "from": "user",
+      "to": "router",
+      "label": "Opens URL",
+      "kind": "request"
+    },
+    {
+      "from": "router",
+      "to": "pages",
+      "label": "Match route",
+      "kind": "internal"
+    },
+    {
+      "from": "pages",
+      "to": "apiClient",
+      "label": "Fetch data",
+      "kind": "request",
+      "detail": "Show the loading state here."
+    },
+    {
+      "from": "apiClient",
+      "to": "backend",
+      "label": "GET …",
+      "kind": "request"
+    },
+    {
+      "from": "backend",
+      "to": "apiClient",
+      "label": "Data",
+      "kind": "response"
+    },
+    {
+      "from": "apiClient",
+      "to": "pages",
+      "label": "Cache + render",
+      "kind": "response",
+      "detail": "Note what is cached and for how long."
+    }
+  ],
+  "howToUse": "Copy steps into flows[].steps, rename each role to a real node id, replace labels with this repo's names, and add file:line to every step."
+}

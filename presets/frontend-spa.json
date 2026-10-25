@@ -1,0 +1,96 @@
+{
+  "id": "frontend-spa",
+  "name": "Frontend app (SPA / static site)",
+  "whenToUse": "A browser app that talks to someone else's API (React+Vite, Vue, Angular, Svelte, Astro islands).",
+  "layers": [
+    {
+      "id": "user",
+      "label": "User",
+      "color": "blue"
+    },
+    {
+      "id": "views",
+      "label": "Views",
+      "color": "green"
+    },
+    {
+      "id": "state",
+      "label": "State",
+      "color": "navy"
+    },
+    {
+      "id": "io",
+      "label": "Data access",
+      "color": "yellow"
+    },
+    {
+      "id": "external",
+      "label": "APIs",
+      "color": "pink"
+    }
+  ],
+  "starterNodes": [
+    {
+      "id": "user",
+      "label": "User",
+      "layer": "user",
+      "kind": "user"
+    },
+    {
+      "id": "router",
+      "label": "Router",
+      "layer": "views",
+      "kind": "ui"
+    },
+    {
+      "id": "pages",
+      "label": "Pages",
+      "layer": "views",
+      "kind": "ui"
+    },
+    {
+      "id": "store",
+      "label": "State store",
+      "layer": "state",
+      "kind": "cache"
+    },
+    {
+      "id": "apiClient",
+      "label": "API client",
+      "layer": "io",
+      "kind": "api"
+    },
+    {
+      "id": "backend",
+      "label": "Backend API",
+      "layer": "external",
+      "kind": "external"
+    }
+  ],
+  "chapters": [
+    "map",
+    "flows",
+    "changes",
+    "tree",
+    "concepts",
+    "quiz",
+    "glossary",
+    "run"
+  ],
+  "mustTrace": [
+    "First page load: routing, data fetching, loading and error states",
+    "One user interaction that changes server data",
+    "How auth tokens are stored and attached"
+  ],
+  "questions": [
+    "Where does state live: server cache, global store, URL, or components?",
+    "How are loading and error states handled?",
+    "Which components are shared design-system pieces vs feature code?"
+  ],
+  "patterns": [
+    "page-load",
+    "optimistic-ui",
+    "auth-session",
+    "validation-error"
+  ]
+}

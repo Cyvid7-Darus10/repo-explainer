@@ -1,0 +1,52 @@
+{
+  "id": "cli-command",
+  "name": "CLI command",
+  "use": "From argv to output and exit code.",
+  "roles": [
+    "caller",
+    "entry",
+    "core",
+    "io"
+  ],
+  "steps": [
+    {
+      "from": "caller",
+      "to": "entry",
+      "label": "Runs the command",
+      "kind": "request"
+    },
+    {
+      "from": "entry",
+      "to": "entry",
+      "label": "Parse flags",
+      "kind": "internal",
+      "detail": "Name the arg parser; note defaults."
+    },
+    {
+      "from": "entry",
+      "to": "core",
+      "label": "Call core function",
+      "kind": "request"
+    },
+    {
+      "from": "core",
+      "to": "io",
+      "label": "Read / write files or network",
+      "kind": "data"
+    },
+    {
+      "from": "core",
+      "to": "entry",
+      "label": "Result or error",
+      "kind": "response"
+    },
+    {
+      "from": "entry",
+      "to": "caller",
+      "label": "Print + exit code",
+      "kind": "response",
+      "detail": "Which exit codes mean what?"
+    }
+  ],
+  "howToUse": "Copy steps into flows[].steps, rename each role to a real node id, replace labels with this repo's names, and add file:line to every step."
+}

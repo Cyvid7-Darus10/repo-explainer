@@ -1,0 +1,94 @@
+{
+  "id": "backend-api",
+  "name": "Backend API / service",
+  "whenToUse": "An HTTP, gRPC or GraphQL service with no UI of its own (Express, FastAPI, Go, Spring, NestJS, Rails API).",
+  "layers": [
+    {
+      "id": "callers",
+      "label": "Callers",
+      "color": "blue"
+    },
+    {
+      "id": "transport",
+      "label": "Transport",
+      "color": "green"
+    },
+    {
+      "id": "domain",
+      "label": "Domain",
+      "color": "navy"
+    },
+    {
+      "id": "data",
+      "label": "Data",
+      "color": "yellow"
+    },
+    {
+      "id": "external",
+      "label": "Dependencies",
+      "color": "pink"
+    }
+  ],
+  "starterNodes": [
+    {
+      "id": "client",
+      "label": "API client",
+      "layer": "callers",
+      "kind": "external"
+    },
+    {
+      "id": "router",
+      "label": "Router & middleware",
+      "layer": "transport",
+      "kind": "api"
+    },
+    {
+      "id": "handler",
+      "label": "Handlers",
+      "layer": "transport",
+      "kind": "api"
+    },
+    {
+      "id": "service",
+      "label": "Services",
+      "layer": "domain",
+      "kind": "service"
+    },
+    {
+      "id": "repo",
+      "label": "Repositories",
+      "layer": "data",
+      "kind": "db"
+    }
+  ],
+  "chapters": [
+    "map",
+    "flows",
+    "changes",
+    "data",
+    "tree",
+    "concepts",
+    "quiz",
+    "glossary",
+    "run"
+  ],
+  "mustTrace": [
+    "One read endpoint through middleware, handler, service and query",
+    "One write endpoint including validation and its error path",
+    "Any async consumer (queue, cron, event) end to end"
+  ],
+  "questions": [
+    "What does the middleware chain do, in order?",
+    "Where are inputs validated and errors mapped to status codes?",
+    "How are transactions and retries handled?",
+    "What are the external dependencies and what happens when they are down?"
+  ],
+  "patterns": [
+    "request-response",
+    "validation-error",
+    "cache-aside",
+    "async-job",
+    "webhook-in",
+    "fan-out-events"
+  ]
+}

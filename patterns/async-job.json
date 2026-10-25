@@ -1,0 +1,42 @@
+{
+  "id": "async-job",
+  "name": "Hand off to a background job",
+  "use": "Slow or unreliable work moved out of the request.",
+  "roles": [
+    "service",
+    "queue",
+    "worker",
+    "external"
+  ],
+  "steps": [
+    {
+      "from": "service",
+      "to": "queue",
+      "label": "Enqueue job",
+      "kind": "async",
+      "detail": "The request returns without waiting.",
+      "why": "Keeps user-facing latency low."
+    },
+    {
+      "from": "queue",
+      "to": "worker",
+      "label": "Deliver job",
+      "kind": "async",
+      "detail": "Note retry count and backoff."
+    },
+    {
+      "from": "worker",
+      "to": "external",
+      "label": "Do the slow work",
+      "kind": "request"
+    },
+    {
+      "from": "worker",
+      "to": "queue",
+      "label": "Ack or retry",
+      "kind": "async",
+      "detail": "What happens after the last retry fails?"
+    }
+  ],
+  "howToUse": "Copy steps into flows[].steps, rename each role to a real node id, replace labels with this repo's names, and add file:line to every step."
+}

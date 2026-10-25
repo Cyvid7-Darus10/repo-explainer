@@ -1,0 +1,32 @@
+{
+  "id": "validation-error",
+  "name": "Bad input → error",
+  "use": "How invalid input is rejected and reported.",
+  "roles": [
+    "client",
+    "api"
+  ],
+  "steps": [
+    {
+      "from": "client",
+      "to": "api",
+      "label": "Request with bad input",
+      "kind": "request"
+    },
+    {
+      "from": "api",
+      "to": "api",
+      "label": "Schema check fails",
+      "kind": "internal",
+      "detail": "Name the validation library and where schemas live."
+    },
+    {
+      "from": "api",
+      "to": "client",
+      "label": "4xx with field errors",
+      "kind": "response",
+      "detail": "Show the error shape callers can rely on."
+    }
+  ],
+  "howToUse": "Copy steps into flows[].steps, rename each role to a real node id, replace labels with this repo's names, and add file:line to every step."
+}

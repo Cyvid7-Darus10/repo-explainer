@@ -1,0 +1,93 @@
+{
+  "id": "fullstack-web",
+  "name": "Full-stack web app",
+  "whenToUse": "A frontend framework plus its own API or database in one repo (Next.js, Remix, SvelteKit, Rails, Django with templates, Laravel).",
+  "layers": [
+    {
+      "id": "client",
+      "label": "Client",
+      "color": "blue"
+    },
+    {
+      "id": "edge",
+      "label": "Edge & API",
+      "color": "green"
+    },
+    {
+      "id": "domain",
+      "label": "Domain",
+      "color": "navy"
+    },
+    {
+      "id": "infra",
+      "label": "Data & infra",
+      "color": "yellow"
+    },
+    {
+      "id": "external",
+      "label": "Outside world",
+      "color": "pink"
+    }
+  ],
+  "starterNodes": [
+    {
+      "id": "user",
+      "label": "User",
+      "layer": "client",
+      "kind": "user"
+    },
+    {
+      "id": "web",
+      "label": "Web app",
+      "layer": "client",
+      "kind": "ui"
+    },
+    {
+      "id": "api",
+      "label": "API routes",
+      "layer": "edge",
+      "kind": "api"
+    },
+    {
+      "id": "service",
+      "label": "Core logic",
+      "layer": "domain",
+      "kind": "service"
+    },
+    {
+      "id": "db",
+      "label": "Database",
+      "layer": "infra",
+      "kind": "db"
+    }
+  ],
+  "chapters": [
+    "map",
+    "flows",
+    "changes",
+    "tree",
+    "data",
+    "concepts",
+    "quiz",
+    "glossary",
+    "run"
+  ],
+  "mustTrace": [
+    "The most common write (create/update the core object) from click to database and back",
+    "Sign-in: how a session is created and checked on later requests",
+    "One background or third-party path (email, payment, webhook) if it exists"
+  ],
+  "questions": [
+    "Where does business logic live: routes, components, or a service layer?",
+    "How is auth enforced, and where can it be forgotten?",
+    "What runs on the server vs in the browser?",
+    "Which code is safe to change, and which is shared by many features?"
+  ],
+  "patterns": [
+    "request-response",
+    "auth-session",
+    "optimistic-ui",
+    "async-job",
+    "webhook-in"
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "id": "cache-aside",
+  "name": "Cache-aside read",
+  "use": "Reads that check a cache before the database.",
+  "roles": [
+    "service",
+    "cache",
+    "db"
+  ],
+  "steps": [
+    {
+      "from": "service",
+      "to": "cache",
+      "label": "GET key",
+      "kind": "request"
+    },
+    {
+      "from": "cache",
+      "to": "service",
+      "label": "Miss",
+      "kind": "response"
+    },
+    {
+      "from": "service",
+      "to": "db",
+      "label": "Query source of truth",
+      "kind": "data"
+    },
+    {
+      "from": "service",
+      "to": "cache",
+      "label": "SET key with TTL",
+      "kind": "request",
+      "detail": "Note TTL and how the key is invalidated on writes."
+    }
+  ],
+  "howToUse": "Copy steps into flows[].steps, rename each role to a real node id, replace labels with this repo's names, and add file:line to every step."
+}

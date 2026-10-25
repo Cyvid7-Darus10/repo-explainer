@@ -1,0 +1,33 @@
+{
+  "id": "fan-out-events",
+  "name": "Publish an event, many consumers",
+  "use": "Event bus / pub-sub / outbox.",
+  "roles": [
+    "service",
+    "queue",
+    "worker"
+  ],
+  "steps": [
+    {
+      "from": "service",
+      "to": "queue",
+      "label": "Publish event",
+      "kind": "async",
+      "detail": "Is it written in the same transaction (outbox)?"
+    },
+    {
+      "from": "queue",
+      "to": "worker",
+      "label": "Consumer A handles it",
+      "kind": "async"
+    },
+    {
+      "from": "queue",
+      "to": "worker",
+      "label": "Consumer B handles it",
+      "kind": "async",
+      "detail": "Consumers must tolerate duplicates and reordering."
+    }
+  ],
+  "howToUse": "Copy steps into flows[].steps, rename each role to a real node id, replace labels with this repo's names, and add file:line to every step."
+}

@@ -1,0 +1,9 @@
+node_modules/
+.DS_Store
+*.log
+/explainer.json
+/gallery.html
+/repo-explainer-assets/
+/.playwright-mcp/
+coverage/
+!test/fixtures/**/node_modules/

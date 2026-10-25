@@ -1,0 +1,1758 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="generator" content="repo-explainer">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22%3E%3Crect x=%222%22 y=%222%22 width=%2228%22 height=%2228%22 rx=%229%22 fill=%22%2358cc02%22/%3E%3C/svg%3E">
+<title>Taskflow, explained · Repo Explainer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+/* repo-explainer design tokens — see references/design-system.md */
+:root {
+  --color-ecto-green: #58cc02;
+  --color-ecto-green-dark: #58a700;
+  --color-lingot-lime: #a5ed6e;
+  --color-eel-light: #d7ffb8;
+  --color-macaw-blue: #1cb0f6;
+  --color-macaw-blue-dark: #1899d6;
+  --color-sky-wash: #ddf4ff;
+  --color-eel-dark-blue: #042c60;
+  --color-midnight: #000437;
+  --color-graphite: #3c3c3c;
+  --color-ash: #777777;
+  --color-charcoal: #4b4b4b;
+  --color-swan: #e5e5e5;
+  --color-polar: #f7f7f7;
+  --color-paper: #ffffff;
+  --color-bee: #ffc800;
+  --color-bee-wash: #fff5d3;
+  --color-pink: #ff86d0;
+  --color-cardinal: #ff4b4b;
+  --color-cardinal-wash: #ffdfe0;
+
+  --font-body: 'Nunito', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-display: 'Nunito', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --text-caption: 13px;
+  --text-body: 15px;
+  --text-lead: 17px;
+  --text-heading-sm: 19px;
+  --text-heading: 32px;
+  --text-display: clamp(40px, 7vw, 64px);
+  --tracking: 0.053em;
+
+  --spacing-8: 8px;
+  --spacing-12: 12px;
+  --spacing-16: 16px;
+  --spacing-24: 24px;
+  --spacing-32: 32px;
+  --spacing-48: 48px;
+  --spacing-64: 64px;
+  --section-gap: 100px;
+
+  --radius: 12px;
+  --border: 2px;
+  --press: 4px;
+  --page-max-width: 1200px;
+  --lesson-max-width: 760px;
+  --header-height: 64px;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 140px; }
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+body {
+  margin: 0;
+  background: var(--color-paper);
+  color: var(--color-charcoal);
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: var(--text-body);
+  line-height: 1.47;
+  letter-spacing: var(--tracking);
+  -webkit-font-smoothing: antialiased;
+}
+h1, h2, h3, h4 { margin: 0; color: var(--color-eel-dark-blue); text-wrap: balance; }
+p { margin: 0; text-wrap: pretty; }
+code, pre, .mono { font-family: var(--font-mono); letter-spacing: 0; }
+button { font: inherit; letter-spacing: inherit; cursor: pointer; }
+:focus-visible { outline: 3px solid var(--color-macaw-blue); outline-offset: 3px; border-radius: var(--radius); }
+.visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.skip-link { position: absolute; left: 16px; top: -48px; z-index: 50; padding: 8px 16px; background: var(--color-paper); border: var(--border) solid var(--color-macaw-blue); border-radius: var(--radius); color: var(--color-macaw-blue); font-weight: 800; }
+.skip-link:focus { top: 12px; }
+.noscript, .fatal { max-width: 640px; margin: 64px auto; padding: 24px; border: var(--border) solid var(--color-cardinal); border-radius: var(--radius); color: var(--color-graphite); }
+.fatal h1 { color: var(--color-cardinal); margin-bottom: 8px; font-size: var(--text-heading-sm); }
+
+/* ---------- Header ---------- */
+.site-header { position: sticky; top: 0; z-index: 20; background: var(--color-paper); border-bottom: var(--border) solid var(--color-swan); }
+.site-header-inner { max-width: var(--page-max-width); margin: 0 auto; height: var(--header-height); padding: 0 16px; display: flex; align-items: center; gap: 16px; }
+.brand { display: flex; align-items: center; gap: 8px; color: var(--color-ecto-green); font-family: var(--font-display); font-weight: 900; font-size: 20px; letter-spacing: -0.01em; text-decoration: none; white-space: nowrap; }
+.brand svg { width: 30px; height: 30px; flex: none; }
+.lesson-progress { flex: 1; height: 16px; background: var(--color-swan); border-radius: 999px; overflow: hidden; min-width: 80px; }
+.lesson-progress-fill { height: 100%; width: 0%; background: var(--color-ecto-green); border-radius: 999px; transition: width 120ms linear; position: relative; }
+.lesson-progress-fill::after { content: ''; position: absolute; left: 8px; right: 8px; top: 4px; height: 4px; border-radius: 999px; background: rgba(255, 255, 255, 0.35); }
+.chapter-nav { display: flex; gap: 8px; overflow-x: auto; padding: 8px 16px 12px; max-width: var(--page-max-width); margin: 0 auto; scrollbar-width: none; }
+.chapter-nav::-webkit-scrollbar { display: none; }
+.chapter-pill { flex: none; display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; border: var(--border) solid var(--color-swan); border-bottom-width: var(--press); border-radius: var(--radius); background: var(--color-paper); color: var(--color-ash); font-weight: 800; font-size: var(--text-caption); text-transform: uppercase; text-decoration: none; }
+.chapter-pill .num { display: inline-grid; place-items: center; width: 20px; height: 20px; border-radius: 999px; background: var(--color-swan); color: var(--color-charcoal); font-size: 11px; }
+.chapter-pill.is-active { border-color: var(--color-lingot-lime); color: var(--color-ecto-green-dark); }
+.chapter-pill.is-active .num { background: var(--color-ecto-green); color: var(--color-paper); }
+.chapter-pill.is-done .num { background: var(--color-eel-light); color: var(--color-ecto-green-dark); }
+
+/* ---------- Buttons ---------- */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; padding: 12px 24px; border: var(--border) solid transparent; border-bottom-width: var(--press); border-radius: var(--radius); font-weight: 800; font-size: var(--text-body); text-transform: uppercase; text-decoration: none; transition: transform 80ms ease, filter 120ms ease; user-select: none; }
+.btn:active:not(:disabled) { transform: translateY(2px); border-bottom-width: var(--border); margin-top: 2px; }
+.btn:disabled { cursor: not-allowed; background: var(--color-swan); border-color: var(--color-swan); color: var(--color-ash); }
+.btn-primary { background: var(--color-ecto-green); border-color: var(--color-ecto-green-dark); color: var(--color-paper); }
+.btn-primary:hover:not(:disabled) { filter: brightness(1.05); }
+.btn-ghost { background: var(--color-paper); border-color: var(--color-swan); color: var(--color-macaw-blue); }
+.btn-ghost:hover:not(:disabled) { background: var(--color-polar); }
+.btn-blue { background: var(--color-macaw-blue); border-color: var(--color-macaw-blue-dark); color: var(--color-paper); }
+.btn-sm { min-height: 36px; padding: 6px 14px; font-size: var(--text-caption); }
+.btn-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+
+/* ---------- Chips, tags, links ---------- */
+.chip { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border: var(--border) solid var(--color-swan); border-radius: var(--radius); background: var(--color-paper); color: var(--color-charcoal); font-weight: 800; font-size: var(--text-caption); text-transform: uppercase; }
+.chip-file { text-transform: none; font-family: var(--font-mono); font-weight: 500; font-size: 12px; color: var(--color-eel-dark-blue); border-color: var(--color-sky-wash); background: var(--color-paper); max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tag { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 8px; font-weight: 800; font-size: 11px; text-transform: uppercase; background: var(--color-polar); color: var(--color-ash); }
+.tag-request { background: var(--color-sky-wash); color: var(--color-macaw-blue-dark); }
+.tag-response { background: var(--color-eel-light); color: var(--color-ecto-green-dark); }
+.tag-async { background: var(--color-bee-wash); color: #a56d00; }
+.tag-data { background: #ffe8f6; color: #b8338a; }
+.tag-agent { background: var(--color-sky-wash); color: var(--color-macaw-blue-dark); }
+.tag-human { background: var(--color-bee-wash); color: #a56d00; }
+.tag-new { background: var(--color-ecto-green); color: var(--color-paper); }
+.link { color: var(--color-macaw-blue); font-weight: 800; text-decoration: none; border-bottom: var(--border) solid var(--color-sky-wash); background: none; border-top: 0; border-left: 0; border-right: 0; padding: 0; }
+.link:hover { border-bottom-color: var(--color-macaw-blue); }
+
+/* ---------- Layout ---------- */
+main { padding-bottom: var(--section-gap); }
+.wrap { max-width: var(--page-max-width); margin: 0 auto; padding: 0 16px; }
+.lesson { max-width: var(--lesson-max-width); margin: 0 auto; }
+.hero { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr); gap: 48px; align-items: center; padding: 56px 0 0; min-height: calc(100vh - 140px); max-height: 860px; }
+.hero-eyebrow { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; color: var(--color-macaw-blue); font-weight: 800; text-transform: uppercase; font-size: var(--text-caption); margin-bottom: 16px; }
+.hero-dot { width: 5px; height: 5px; border-radius: 999px; background: var(--color-swan); }
+.hero h1 { font-family: var(--font-display); font-weight: 900; font-size: var(--text-display); line-height: 1.05; letter-spacing: -0.02em; color: var(--color-ecto-green); }
+.hero-summary { margin-top: 20px; font-size: 18px; line-height: 1.55; color: var(--color-charcoal); max-width: 52ch; }
+.hero-actions { margin-top: 32px; }
+.hero-glance { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); margin: 40px 0 0; max-width: 560px; border: var(--border) solid var(--color-swan); border-bottom-width: var(--press); border-radius: var(--radius); }
+.hero-glance div { display: flex; flex-direction: column-reverse; gap: 2px; padding: 12px 16px; }
+.hero-glance div + div { border-left: var(--border) solid var(--color-swan); }
+.hero-glance dd { margin: 0; font-family: var(--font-display); font-size: 26px; font-weight: 900; line-height: 1.1; color: var(--color-eel-dark-blue); font-variant-numeric: tabular-nums; }
+.hero-glance dt { font-size: 11px; font-weight: 800; color: var(--color-ash); text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hero-stack { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 20px; max-width: 560px; }
+.hero-stack-label { font-size: 12px; font-weight: 800; text-transform: uppercase; color: var(--color-ash); margin-right: 4px; }
+.hero-stack .chip { padding: 3px 9px; font-size: 12px; }
+.hero-art svg { width: 100%; max-width: 520px; height: auto; display: block; margin-left: auto; }
+.hero-art-label { font-family: var(--font-body); font-weight: 800; font-size: 14px; fill: var(--color-eel-dark-blue); letter-spacing: 0.02em; }
+.hero-art-num { font-family: var(--font-body); font-weight: 900; font-size: 12px; fill: var(--color-paper); }
+.hero-art-caption { font-family: var(--font-body); font-weight: 800; font-size: 14px; fill: var(--color-ecto-green-dark); text-transform: uppercase; letter-spacing: 0.06em; }
+
+.chapter { padding-top: var(--section-gap); }
+.chapter-head { max-width: var(--lesson-max-width); margin: 0 auto 32px; }
+.chapter-eyebrow { display: inline-flex; align-items: center; gap: 8px; color: var(--color-ecto-green-dark); font-weight: 800; font-size: var(--text-caption); text-transform: uppercase; margin-bottom: 12px; }
+.chapter-eyebrow .num { display: inline-grid; place-items: center; width: 28px; height: 28px; border-radius: 999px; background: var(--color-ecto-green); color: var(--color-paper); }
+.chapter-head h2 { font-family: var(--font-display); font-weight: 900; font-size: clamp(30px, 4.5vw, 48px); line-height: 1.12; letter-spacing: -0.02em; }
+.chapter-lead { margin-top: 12px; font-size: var(--text-lead); }
+.chapter-next { display: flex; justify-content: center; margin-top: 48px; }
+.empty { padding: 24px; border: var(--border) dashed var(--color-swan); border-radius: var(--radius); color: var(--color-ash); text-align: center; }
+
+.card { border: var(--border) solid var(--color-swan); border-bottom-width: var(--press); border-radius: var(--radius); background: var(--color-paper); padding: 24px; }
+.callout { margin-top: 16px; padding: 16px; border-radius: var(--radius); border: var(--border) solid var(--color-lingot-lime); background: var(--color-eel-light); color: var(--color-eel-dark-blue); }
+.callout b { display: block; text-transform: uppercase; font-size: 12px; color: var(--color-ecto-green-dark); margin-bottom: 4px; }
+
+pre.code { margin: 16px 0 0; padding: 16px; border-radius: var(--radius); background: var(--color-midnight); color: #e8ecff; font-size: 13px; line-height: 1.6; overflow-x: auto; }
+pre.code .hl { color: var(--color-lingot-lime); }
+pre.code .cm { color: #8a90c2; }
+pre.code .st { color: #ffd66b; }
+.code-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 16px; }
+.code-head + pre.code { margin-top: 8px; }
+
+/* ---------- Architecture map ---------- */
+.map-shell { display: flex; flex-direction: column; gap: 24px; }
+.map-scroll { overflow-x: auto; padding-bottom: 8px; }
+.map-canvas { position: relative; padding: 12px 8px; min-width: calc(var(--cols) * 170px); }
+.map-edges { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
+.map-grid { position: relative; display: grid; grid-template-columns: repeat(var(--cols), minmax(0, 1fr)); gap: 48px; }
+.map-col { display: flex; flex-direction: column; gap: 16px; }
+.map-col-head { align-self: flex-start; padding: 4px 10px; border-radius: 8px; background: var(--layer-wash); color: var(--layer-ink); font-weight: 800; font-size: 12px; text-transform: uppercase; }
+.node { position: relative; display: flex; align-items: center; gap: 10px; width: 100%; padding: 12px; text-align: left; background: var(--color-paper); border: var(--border) solid var(--color-swan); border-bottom-width: var(--press); border-radius: var(--radius); color: var(--color-graphite); transition: opacity 160ms ease, border-color 160ms ease, transform 80ms ease; }
+.node:hover { border-color: var(--layer); }
+.node:active { transform: translateY(2px); }
+.node svg { width: 32px; height: 32px; flex: none; }
+.node-text { min-width: 0; }
+.node-label { display: block; font-weight: 800; font-size: 14px; line-height: 1.25; color: var(--color-eel-dark-blue); overflow-wrap: break-word; }
+.node-tech { display: block; font-size: 12px; color: var(--color-ash); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.node-badge { position: absolute; top: -10px; right: 8px; }
+.map-canvas.has-selection .node { opacity: 0.35; }
+.map-canvas.has-selection .node.is-related { opacity: 1; }
+.map-canvas.has-selection .node.is-selected { opacity: 1; border-color: var(--layer); background: var(--layer-wash); }
+.map-canvas.is-changes .node { opacity: 0.35; }
+.map-canvas.is-changes .node.is-changed { opacity: 1; border-color: var(--color-ecto-green); }
+.edge { fill: none; stroke: var(--color-swan); stroke-width: 2.5; transition: stroke 160ms ease, opacity 160ms ease; }
+.edge.is-async { stroke-dasharray: 6 6; }
+.map-canvas.has-selection .edge { opacity: 0.25; }
+.map-canvas.has-selection .edge.is-active { opacity: 1; stroke: var(--color-macaw-blue); stroke-width: 3; }
+.edge-label { font-family: var(--font-body); font-size: 11px; font-weight: 800; fill: var(--color-macaw-blue-dark); paint-order: stroke; stroke: var(--color-paper); stroke-width: 5px; stroke-linejoin: round; opacity: 0; }
+.map-canvas.has-selection .edge-label.is-active { opacity: 1; }
+.map-detail { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 8px 32px; align-items: start; }
+.map-detail > .detail-main { min-width: 0; }
+.map-detail > .detail-side { min-width: 0; }
+.map-detail h3 { font-size: var(--text-heading-sm); margin: 8px 0; }
+.map-detail .files { display: flex; flex-direction: column; gap: 6px; margin-top: 12px; }
+.map-detail .rel { list-style: none; margin: 8px 0 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.map-detail .rel li { display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap; }
+.detail-label { margin-top: 16px; font-size: 12px; font-weight: 800; text-transform: uppercase; color: var(--color-ash); }
+.map-legend { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 16px; color: var(--color-ash); font-size: 12px; font-weight: 800; text-transform: uppercase; }
+.map-legend span { display: inline-flex; align-items: center; gap: 6px; }
+.map-legend i { display: inline-block; width: 24px; border-top: 3px solid var(--color-swan); }
+.map-legend i.dash { border-top-style: dashed; }
+
+/* ---------- Flow player ---------- */
+.flow-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 24px; }
+.flow-tab[aria-selected='true'] { border-color: var(--color-macaw-blue); color: var(--color-macaw-blue); background: var(--color-sky-wash); }
+.flow-meta { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 16px; }
+.flow-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(320px, 400px); gap: 24px; align-items: start; }
+.flow-layout > * { min-width: 0; }
+.flow-layout > .step-card { position: sticky; top: 140px; max-height: calc(100vh - 160px); overflow-y: auto; }
+.seq-wrap { border: var(--border) solid var(--color-swan); border-bottom-width: var(--press); border-radius: var(--radius); background: var(--color-paper); }
+.seq svg { display: block; }
+.seq-heads-wrap { position: sticky; top: 122px; z-index: 1; overflow: hidden; background: var(--color-paper); border-bottom: var(--border) solid var(--color-polar); border-radius: var(--radius) var(--radius) 0 0; }
+.seq-heads { will-change: transform; }
+.seq-body { overflow-x: auto; overflow-y: hidden; scrollbar-width: thin; }
+.seq-head-label { font-family: var(--font-body); font-weight: 800; font-size: 12px; fill: var(--color-eel-dark-blue); letter-spacing: 0.04em; }
+.seq-lifeline { stroke: var(--color-swan); stroke-width: 2; stroke-dasharray: 4 6; }
+.seq-step { cursor: pointer; }
+.seq-step .arrow { fill: none; stroke: var(--color-swan); stroke-width: 2.5; }
+.seq-step.is-done .arrow { stroke: var(--color-ash); }
+.seq-step.is-current .arrow { stroke: var(--color-ecto-green); stroke-width: 4; }
+.seq-step.is-dashed .arrow { stroke-dasharray: 7 6; }
+.seq-step .label { font-family: var(--font-body); font-size: 12px; font-weight: 700; fill: var(--color-ash); }
+.seq-step.is-done .label { fill: var(--color-charcoal); }
+.seq-step.is-current .label { fill: var(--color-eel-dark-blue); font-weight: 800; }
+.seq-step .badge-bg { fill: var(--color-swan); }
+.seq-step.is-done .badge-bg { fill: var(--color-eel-light); }
+.seq-step.is-current .badge-bg { fill: var(--color-ecto-green); }
+.seq-step .badge-num { font-family: var(--font-body); font-size: 11px; font-weight: 800; fill: var(--color-charcoal); }
+.seq-step.is-current .badge-num { fill: var(--color-paper); }
+.seq-step:focus-visible { outline: none; }
+.seq-step:focus-visible .hit { stroke: var(--color-macaw-blue); stroke-width: 2; }
+.seq-step .hit { fill: transparent; }
+.seq-step:hover .hit { fill: var(--color-polar); }
+.seq-dot { fill: var(--color-ecto-green); stroke: var(--color-paper); stroke-width: 3; }
+.step-card { display: flex; flex-direction: column; gap: 12px; }
+.step-body { display: flex; flex-direction: column; gap: 16px; }
+.step-text { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.step-code { min-width: 0; }
+.step-code pre.code { margin-top: 8px; }
+.step-top { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.step-count { font-weight: 800; color: var(--color-ash); font-size: var(--text-caption); text-transform: uppercase; }
+.step-card h3 { font-size: 22px; line-height: 1.25; }
+.step-route { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-weight: 800; color: var(--color-eel-dark-blue); font-size: 14px; }
+.step-route svg { width: 24px; height: 24px; }
+.step-route .arrow-glyph { color: var(--color-ash); }
+.step-controls { flex-wrap: wrap; display: flex; gap: 12px; align-items: center; justify-content: space-between; margin-top: 8px; }
+.step-dots { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
+.step-dots button { width: 10px; height: 10px; padding: 0; border-radius: 999px; border: 0; background: var(--color-swan); }
+.step-dots button.is-done { background: var(--color-lingot-lime); }
+.step-dots button.is-current { background: var(--color-ecto-green); width: 24px; }
+.flow-done { text-align: center; padding: 32px 24px; }
+.flow-done .trophy { width: 72px; height: 72px; margin: 0 auto 12px; }
+.flow-done h3 { color: var(--color-ecto-green); font-family: var(--font-display); font-size: 28px; font-weight: 900; }
+.flow-done p { margin: 8px 0 24px; }
+.kbd-hint { margin-top: 12px; font-size: 12px; color: var(--color-ash); }
+kbd { font-family: var(--font-mono); font-size: 11px; padding: 1px 6px; border: var(--border) solid var(--color-swan); border-bottom-width: 3px; border-radius: 6px; color: var(--color-charcoal); }
+
+/* ---------- Changes timeline ---------- */
+.stat { padding: 12px 16px; border: var(--border) solid var(--color-swan); border-bottom-width: var(--press); border-radius: var(--radius); }
+.stat b { display: block; font-family: var(--font-display); font-size: 28px; font-weight: 900; color: var(--color-eel-dark-blue); line-height: 1.1; font-variant-numeric: tabular-nums; }
+.stat span { font-size: 12px; font-weight: 800; color: var(--color-ash); text-transform: uppercase; }
+.changes-toolbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+.filter-group { display: flex; gap: 8px; flex-wrap: wrap; }
+.filter-group .chip { cursor: pointer; }
+.filter-group .chip[aria-pressed='true'] { border-color: var(--color-macaw-blue); color: var(--color-macaw-blue); background: var(--color-sky-wash); }
+.changes-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-bottom: 32px; }
+.timeline { list-style: none; margin: 0; padding: 0; position: relative; display: flex; flex-direction: column; gap: 16px; }
+.timeline::before { content: ''; position: absolute; left: 19px; top: 8px; bottom: 8px; border-left: 3px solid var(--color-swan); }
+.change { position: relative; display: grid; grid-template-columns: 40px minmax(0, 1fr); gap: 16px; }
+.change-dot { position: relative; z-index: 1; width: 40px; height: 40px; display: grid; place-items: center; border-radius: 999px; background: var(--color-paper); border: 3px solid var(--color-swan); }
+.change-dot svg { width: 22px; height: 22px; }
+.change.is-agent .change-dot { border-color: var(--color-macaw-blue); }
+.change.is-human .change-dot { border-color: var(--color-bee); }
+.change-card { padding: 16px 20px; }
+.change-top { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; color: var(--color-ash); font-size: 12px; font-weight: 800; text-transform: uppercase; }
+.change-card h3 { margin: 8px 0 4px; font-size: 17px; line-height: 1.3; }
+.change-why { margin-top: 12px; padding: 12px 14px; border-left: 4px solid var(--color-lingot-lime); background: var(--color-polar); border-radius: 0 var(--radius) var(--radius) 0; }
+.change-why b { display: block; font-size: 11px; text-transform: uppercase; color: var(--color-ecto-green-dark); }
+.change-nodes { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+.change-risk { margin-top: 10px; font-size: 13px; color: #a56d00; }
+
+/* ---------- Tree ---------- */
+.tree { list-style: none; margin: 0; padding: 8px 0; }
+.tree li { display: grid; grid-template-columns: minmax(0, auto) minmax(0, 1fr); gap: 16px; align-items: baseline; padding: 10px 16px; border-bottom: var(--border) solid var(--color-polar); }
+.tree li:last-child { border-bottom: 0; }
+.tree .path { display: inline-flex; align-items: center; gap: 8px; font-family: var(--font-mono); font-size: 13px; color: var(--color-eel-dark-blue); white-space: nowrap; }
+.tree .path svg { width: 18px; height: 18px; flex: none; }
+.tree .note { color: var(--color-charcoal); font-size: 14px; }
+.tree li.is-key .path { font-weight: 700; }
+.tree li.is-key .note::before { content: '★ '; color: var(--color-bee); }
+
+/* ---------- Data model (ER diagram + field table) ---------- */
+.er-canvas { min-width: calc(var(--er-cols) * 130px); }
+.er-grid { position: relative; display: grid; grid-template-columns: repeat(var(--er-cols), minmax(0, 1fr)); row-gap: 80px; column-gap: 0; padding: 8px 0; }
+.entity { justify-self: center; width: min(100% - 32px, 250px); display: flex; flex-direction: column; gap: 10px; padding: 14px 16px; text-align: left; background: var(--color-paper); border: var(--border) solid var(--color-swan); border-bottom-width: var(--press); border-radius: var(--radius); color: var(--color-graphite); transition: opacity 160ms ease, border-color 160ms ease, transform 80ms ease; --layer: var(--color-macaw-blue); --layer-wash: var(--color-sky-wash); }
+.entity:hover { border-color: var(--color-macaw-blue); }
+.entity:active { transform: translateY(2px); }
+.entity-head { display: flex; align-items: center; gap: 10px; }
+.entity-head svg { width: 28px; height: 28px; flex: none; }
+.entity-name { font-weight: 800; font-size: 16px; color: var(--color-eel-dark-blue); }
+.entity-count { margin-left: auto; font-size: 12px; font-weight: 800; color: var(--color-ash); text-transform: uppercase; white-space: nowrap; }
+.entity-keys { display: flex; flex-direction: column; gap: 4px; padding-top: 10px; border-top: var(--border) solid var(--color-polar); }
+.entity-key { display: flex; align-items: center; gap: 8px; font-family: var(--font-mono); font-size: 12px; color: var(--color-eel-dark-blue); letter-spacing: 0; }
+.key-badge { display: inline-grid; place-items: center; min-width: 26px; padding: 1px 5px; border-radius: 6px; font-family: var(--font-body); font-size: 10px; font-weight: 800; letter-spacing: 0.04em; }
+.key-badge.is-pk { background: var(--color-bee-wash); color: #a56d00; }
+.key-badge.is-fk { background: var(--color-sky-wash); color: var(--color-macaw-blue-dark); }
+.er-canvas.has-selection .entity { opacity: 0.4; }
+.er-canvas.has-selection .entity.is-related { opacity: 1; }
+.er-canvas.has-selection .entity.is-selected { opacity: 1; border-color: var(--color-macaw-blue); background: var(--color-sky-wash); }
+.er-card { font-family: var(--font-body); font-size: 13px; font-weight: 900; fill: var(--color-ash); paint-order: stroke; stroke: var(--color-paper); stroke-width: 5px; }
+.er-canvas.has-selection .er-card.is-active { fill: var(--color-macaw-blue-dark); }
+.er-canvas.has-selection .edge-label.is-active { opacity: 1; }
+.er-detail { margin-top: 24px; padding: 0; overflow: hidden; }
+.er-detail-head { padding: 20px 24px 16px; }
+.er-detail-head h3 { display: flex; align-items: center; gap: 10px; font-size: 22px; }
+.er-detail-head h3 svg { width: 28px; height: 28px; }
+.er-detail-head p { margin-top: 6px; }
+.er-fields { display: flex; flex-direction: column; }
+.er-row { display: grid; grid-template-columns: minmax(180px, 1.1fr) minmax(140px, 1fr) minmax(0, 1.6fr); gap: 16px; align-items: baseline; padding: 12px 24px; border-top: var(--border) solid var(--color-polar); }
+.er-row-head { padding-top: 10px; padding-bottom: 10px; background: var(--color-polar); font-size: 12px; font-weight: 800; text-transform: uppercase; color: var(--color-ash); }
+.er-name { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.er-name code { font-weight: 700; color: var(--color-eel-dark-blue); font-size: 14px; }
+.er-type code { font-size: 13px; color: var(--color-macaw-blue-dark); overflow-wrap: anywhere; }
+.er-note { font-size: 14px; color: var(--color-charcoal); }
+.er-fk { font-size: 13px; }
+.er-rels { padding: 16px 24px 20px; border-top: var(--border) solid var(--color-swan); }
+
+/* ---------- Concepts carousel ---------- */
+.concept-card { min-height: 280px; display: flex; flex-direction: column; gap: 12px; }
+.concept-card h3 { font-family: var(--font-display); font-weight: 900; font-size: 28px; line-height: 1.15; color: var(--color-eel-dark-blue); }
+.concept-card p { font-size: var(--text-lead); }
+.carousel-controls { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 16px; }
+
+/* ---------- Quiz ---------- */
+.quiz { display: flex; flex-direction: column; gap: 24px; }
+.question h3 { font-size: var(--text-heading-sm); margin-bottom: 16px; }
+.options { display: grid; gap: 10px; }
+.option { display: flex; align-items: center; gap: 12px; width: 100%; padding: 14px 16px; text-align: left; background: var(--color-paper); border: var(--border) solid var(--color-swan); border-bottom-width: var(--press); border-radius: var(--radius); color: var(--color-graphite); font-weight: 700; }
+.option .key { flex: none; display: inline-grid; place-items: center; width: 28px; height: 28px; border: var(--border) solid var(--color-swan); border-radius: 8px; font-size: 12px; color: var(--color-ash); }
+.option:hover:not(:disabled) { background: var(--color-polar); }
+.option[aria-checked='true'] { border-color: var(--color-macaw-blue); background: var(--color-sky-wash); color: var(--color-macaw-blue-dark); }
+.option[aria-checked='true'] .key { border-color: var(--color-macaw-blue); color: var(--color-macaw-blue); }
+.option.is-correct { border-color: var(--color-ecto-green); background: var(--color-eel-light); color: var(--color-ecto-green-dark); }
+.option.is-wrong { border-color: var(--color-cardinal); background: var(--color-cardinal-wash); color: #c33; }
+.option:disabled { cursor: default; }
+.feedback { margin-top: 16px; padding: 16px; border-radius: var(--radius); font-weight: 700; }
+.feedback b { display: block; font-family: var(--font-display); font-size: 20px; font-weight: 900; margin-bottom: 4px; }
+.feedback.is-correct { background: var(--color-eel-light); color: var(--color-ecto-green-dark); }
+.feedback.is-wrong { background: var(--color-cardinal-wash); color: #c33; }
+.question-actions { margin-top: 16px; display: flex; justify-content: flex-end; }
+.score { display: flex; align-items: center; gap: 16px; }
+.score-bar { flex: 1; height: 16px; border-radius: 999px; background: var(--color-swan); overflow: hidden; }
+.score-bar div { height: 100%; background: var(--color-ecto-green); border-radius: 999px; transition: width 300ms ease; }
+.score b { font-family: var(--font-display); font-weight: 900; font-size: 20px; color: var(--color-eel-dark-blue); white-space: nowrap; }
+
+/* ---------- Glossary & runbook ---------- */
+.search { width: 100%; padding: 12px 16px; border: var(--border) solid var(--color-swan); border-radius: var(--radius); background: var(--color-polar); font: inherit; font-size: 16px; color: var(--color-graphite); }
+.search:focus { outline: none; border-color: var(--color-macaw-blue); background: var(--color-paper); }
+.glossary { margin: 16px 0 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; }
+.glossary div { padding: 16px; border: var(--border) solid var(--color-swan); border-radius: var(--radius); }
+.glossary dt { font-weight: 800; color: var(--color-eel-dark-blue); }
+.glossary dd { margin: 4px 0 0; font-size: 14px; }
+.runbook { display: flex; flex-direction: column; gap: 16px; }
+.runbook .card { padding: 16px 20px; }
+.runbook h3 { font-size: 16px; }
+.runbook p { font-size: 14px; margin-top: 4px; }
+
+.site-footer { margin-top: var(--section-gap); padding: 32px 16px; border-top: var(--border) solid var(--color-swan); text-align: center; color: var(--color-ash); font-size: var(--text-caption); display: flex; flex-direction: column; gap: 4px; }
+
+/* ---------- Motion ---------- */
+.reveal { opacity: 0; transform: translateY(16px); transition: opacity 500ms ease, transform 500ms cubic-bezier(0.2, 0.8, 0.2, 1); }
+.reveal.is-visible { opacity: 1; transform: none; }
+@keyframes edge-flow { to { stroke-dashoffset: -28; } }
+.map-canvas.has-selection .edge.is-active { stroke-dasharray: 8 6; animation: edge-flow 1.1s linear infinite; }
+.seq-step .arrow, .seq-step .badge-bg, .seq-step .label { transition: stroke 200ms ease, fill 200ms ease; }
+.step-dots button { transition: width 200ms cubic-bezier(0.2, 0.8, 0.2, 1), background 200ms ease; }
+
+/* ---------- Responsive ---------- */
+@media (max-width: 960px) {
+  .hero { grid-template-columns: 1fr; padding-top: 32px; gap: 16px; min-height: 0; max-height: none; }
+  .hero-art { order: -1; max-width: 380px; width: 100%; margin: 0 auto; }
+  .flow-layout { grid-template-columns: minmax(0, 1fr); }
+  .flow-layout > .step-card { position: static; max-height: none; }
+  .seq-heads-wrap { top: 118px; }
+  .map-detail { grid-template-columns: 1fr; }
+}
+@media (max-width: 720px) {
+  :root { --section-gap: 72px; }
+  .map-canvas { min-width: 0; }
+  .map-grid { grid-template-columns: 1fr; gap: 28px; }
+  .changes-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .hero-glance { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .hero-glance div:nth-child(3) { border-left: 0; }
+  .hero-glance div:nth-child(n+3) { border-top: var(--border) solid var(--color-swan); }
+  .tree li { grid-template-columns: 1fr; gap: 4px; }
+  .er-canvas { min-width: 0; }
+  .er-grid { grid-template-columns: 1fr; row-gap: 32px; }
+  .entity { grid-column: 1 / -1 !important; grid-row: auto !important; width: 100%; }
+  .er-row { grid-template-columns: 1fr auto; }
+  .er-note { grid-column: 1 / -1; }
+  .er-row-head .er-note, .er-row-head span:last-child { display: none; }
+  .brand-text { display: none; }
+  .card { padding: 16px; }
+}
+@media print {
+  .reveal { opacity: 1; transform: none; }
+  .site-header, .chapter-next, .step-controls, .carousel-controls { display: none; }
+  .chapter { break-inside: avoid-page; padding-top: 32px; }
+}
+
+/* Step controls: progress dots on their own row, Back left, Continue right. */
+.step-controls .step-dots { order: -1; flex-basis: 100%; justify-content: flex-start; }
+.step-controls .btn-primary { margin-left: auto; }
+.step-controls > .step-count { order: -1; flex-basis: 100%; }
+
+/* ---------- Kit gallery ---------- */
+.kit-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 12px; }
+.kit-grid-wide { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
+.kit-icon { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 16px; text-align: center; }
+.kit-icon svg { width: 48px; height: 48px; }
+.kit-icon code, .kit-swatch code, .kit-pattern code { font-size: 12px; color: var(--color-macaw-blue-dark); }
+.kit-swatch { display: flex; flex-direction: column; gap: 4px; padding: 16px; }
+.kit-swatch p { font-size: 13px; color: var(--color-ash); }
+.kit-chip { height: 48px; border-radius: 8px; border: var(--border) solid var(--color-swan); margin-bottom: 8px; }
+.kit-layer { display: flex; flex-direction: column; gap: 12px; padding: 16px; }
+.kit-stack { display: flex; flex-direction: column; gap: 20px; }
+.kit-pattern { display: flex; flex-direction: column; gap: 8px; padding: 16px 20px; }
+.kit-pattern h3 { font-size: 17px; }
+.kit-logo svg { width: 220px; height: 220px; display: block; margin: 0 auto; }
+.kit-credit { margin-top: 16px; font-size: 13px; color: var(--color-ash); max-width: 60ch; }
+
+</style>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<div id="app" aria-busy="true"></div>
+<noscript><p class="noscript">This explainer needs JavaScript to draw its diagrams.</p></noscript>
+<script type="application/json" id="explainer-data">{"$schema":"../references/data-schema.md","meta":{"title":"Taskflow, explained","repo":"acme/taskflow","summary":"A team to-do app. A Next.js web app talks to a small API, which stores tasks in Postgres and hands slow work (emails, webhooks) to a background worker.","stack":["Next.js 15","TypeScript","Postgres","Prisma","BullMQ","Redis","Stripe"],"preset":"fullstack-web","generatedAt":"2026-10-25","commit":"9f3c2ab41e"},"layers":[{"id":"client","label":"Client","color":"blue"},{"id":"edge","label":"Edge \u0026 API","color":"green"},{"id":"domain","label":"Domain","color":"navy"},{"id":"infra","label":"Data \u0026 infra","color":"yellow"},{"id":"external","label":"Outside world","color":"pink"}],"nodes":[{"id":"user","label":"Team member","layer":"client","kind":"user","summary":"Someone using Taskflow in their browser.","files":[]},{"id":"web","label":"Web app","layer":"client","kind":"ui","tech":"Next.js App Router","summary":"Pages and React components. Server components fetch data; client components handle forms and optimistic updates.","files":["apps/web/app/","apps/web/components/"]},{"id":"middleware","label":"Auth middleware","layer":"edge","kind":"auth","tech":"Next middleware + JWT","summary":"Runs before every request. Reads the session cookie, rejects anonymous users, and puts the user id on the request.","files":["apps/web/middleware.ts"]},{"id":"api","label":"Tasks API","layer":"edge","kind":"api","tech":"Route handlers","summary":"Thin HTTP layer. Parses and validates input with Zod, then calls the task service. Never touches the database directly.","files":["apps/web/app/api/tasks/route.ts"]},{"id":"service","label":"Task service","layer":"domain","kind":"service","tech":"Plain TypeScript","summary":"All business rules live here: who can edit a task, what happens when it is completed, which events fire.","files":["packages/core/src/tasks/service.ts"]},{"id":"billing","label":"Billing service","layer":"domain","kind":"service","tech":"Stripe SDK","summary":"Checks plan limits (free teams get 50 open tasks) and syncs subscription state from Stripe webhooks.","files":["packages/core/src/billing/"]},{"id":"db","label":"Postgres","layer":"infra","kind":"db","tech":"Prisma ORM","summary":"The source of truth for teams, users and tasks.","files":["packages/db/prisma/schema.prisma"]},{"id":"queue","label":"Job queue","layer":"infra","kind":"queue","tech":"BullMQ on Redis","summary":"Holds slow work so requests stay fast. Each job is retried 5 times with backoff.","files":["packages/core/src/queue.ts"]},{"id":"worker","label":"Worker","layer":"infra","kind":"job","tech":"Node process","summary":"Pulls jobs off the queue: sends emails, fires customer webhooks, rolls up daily stats.","files":["apps/worker/src/index.ts"]},{"id":"email","label":"Email provider","layer":"external","kind":"external","tech":"Resend","summary":"Delivers notification emails.","files":["apps/worker/src/jobs/send-email.ts"]},{"id":"stripe","label":"Stripe","layer":"external","kind":"external","summary":"Payments and subscriptions.","files":["apps/web/app/api/stripe/webhook/route.ts"]}],"edges":[{"from":"user","to":"web","label":"clicks"},{"from":"web","to":"middleware","label":"fetch /api/*"},{"from":"middleware","to":"api","label":"user id"},{"from":"api","to":"service","label":"createTask()"},{"from":"service","to":"billing","label":"checkLimit()"},{"from":"service","to":"db","label":"insert","kind":"data"},{"from":"service","to":"queue","label":"enqueue","kind":"async"},{"from":"queue","to":"worker","label":"job","kind":"async"},{"from":"worker","to":"email","label":"send"},{"from":"stripe","to":"billing","label":"webhook","kind":"async"}],"flows":[{"id":"create-task","title":"Create a task","trigger":"User presses “Add task”","summary":"The most common write in the app. Follow it from the click to the email the assignee receives.","steps":[{"from":"user","to":"web","label":"Types a title, presses Add","kind":"request","detail":"The form is a client component. It shows the task instantly (optimistic update) before the server answers.","file":"apps/web/components/new-task-form.tsx:24"},{"from":"web","to":"api","label":"POST /api/tasks","kind":"request","detail":"A normal fetch with the session cookie attached. The auth middleware runs first: no valid session means a 401 and the request stops.","file":"apps/web/components/new-task-form.tsx:41","code":"await fetch('/api/tasks', {\n  method: 'POST',\n  body: JSON.stringify({ title, assigneeId }),\n})","lang":"ts","why":"Doing auth once in middleware means no route can forget to check it."},{"from":"api","to":"service","label":"Validates, calls createTask()","kind":"request","detail":"Zod rejects bad input with a 422 before any business logic runs.","file":"apps/web/app/api/tasks/route.ts:18","code":"const input = CreateTask.parse(await req.json())\nconst task = await tasks.createTask(userId, input)\nreturn Response.json(task, { status: 201 })","lang":"ts"},{"from":"service","to":"service","label":"Checks the plan limit","kind":"internal","detail":"Free teams can have 50 open tasks. Over the limit, billing.checkLimit() throws and the API answers 402.","file":"packages/core/src/billing/limits.ts:9"},{"from":"service","to":"db","label":"INSERT the task","kind":"data","detail":"Inside a transaction together with an activity-log row, so the history can never miss a task.","file":"packages/core/src/tasks/service.ts:57"},{"from":"service","to":"queue","label":"Enqueue “task.assigned”","kind":"async","detail":"Only if someone else was assigned. The request does not wait for the email.","why":"Email providers can take seconds. Queuing keeps the click under 100 ms.","file":"packages/core/src/tasks/service.ts:71"},{"from":"api","to":"web","label":"201 Created","kind":"response","detail":"The real task replaces the optimistic one. If anything failed, the form rolls back and shows the error.","file":"apps/web/app/api/tasks/route.ts:20"},{"from":"queue","to":"worker","label":"Worker sends the email","kind":"async","detail":"Usually within a second. Failed jobs retry with backoff, then the assignee gets the email.","file":"apps/worker/src/index.ts:15"}]},{"id":"upgrade","title":"Upgrade to Pro","trigger":"Stripe sends a webhook","summary":"Payment happens on Stripe’s page. We only learn about it through a webhook.","steps":[{"from":"stripe","to":"billing","label":"checkout.session.completed","kind":"async","detail":"The webhook route checks the Stripe signature first, then hands the event to the billing service.","why":"Without the signature check, anyone could POST a fake ‘paid’ event.","file":"apps/web/app/api/stripe/webhook/route.ts:10"},{"from":"billing","to":"db","label":"Set team.plan = 'pro'","kind":"data","detail":"Idempotent: replaying the same event changes nothing.","file":"packages/core/src/billing/sync.ts:22"},{"from":"billing","to":"queue","label":"Enqueue welcome email","kind":"async","file":"packages/core/src/billing/sync.ts:30"},{"from":"queue","to":"worker","label":"Job runs","kind":"async","file":"apps/worker/src/index.ts:15"},{"from":"worker","to":"email","label":"“Welcome to Pro”","kind":"request","file":"apps/worker/src/jobs/send-email.ts:8"}]}],"changes":[{"id":"pr-482","title":"Move task emails onto the queue","date":"2026-10-24","author":"claude-agent","authorType":"agent","ref":"#482","kind":"perf","what":"createTask() used to call Resend inline. Now it enqueues a job and the worker sends it.","why":"p95 for POST /api/tasks was 1.8 s because of email latency. It is now 90 ms.","risk":"Emails can arrive a few seconds late; retries may duplicate an email if the provider times out after sending.","nodes":["service","queue","worker"],"files":["packages/core/src/tasks/service.ts","apps/worker/src/jobs/send-email.ts"]},{"id":"pr-479","title":"Enforce the 50-task limit on the free plan","date":"2026-10-24","author":"maria","authorType":"human","ref":"#479","kind":"feat","what":"New billing.checkLimit() call before every insert, plus a 402 response and an upgrade banner.","why":"Pricing change agreed for Q4: free stays useful for small teams, heavy users upgrade.","nodes":["billing","service","api","web"],"files":["packages/core/src/billing/limits.ts"]},{"id":"pr-475","title":"Verify Stripe webhook signatures","date":"2026-10-23","author":"security-agent","authorType":"agent","ref":"#475","kind":"security","what":"The webhook route now rejects any request whose Stripe-Signature header does not verify.","why":"An audit found the endpoint trusted any POST. Anyone could have upgraded a team for free.","nodes":["stripe","billing"],"files":["apps/web/app/api/stripe/webhook/route.ts"]},{"id":"pr-471","title":"Split auth checks out of route handlers","date":"2026-10-22","author":"dev-agent-2","authorType":"agent","ref":"#471","kind":"refactor","what":"Twelve copies of the session check were replaced by one middleware.","why":"Two new routes had shipped without auth. One place to check means none can forget.","nodes":["middleware","api"],"files":["apps/web/middleware.ts"]}],"tree":[{"path":"apps/","note":"Things you can run"},{"path":"apps/web/","note":"The Next.js app: pages, components and API routes","key":true},{"path":"apps/web/app/api/","note":"HTTP endpoints. Thin: validate, then call packages/core"},{"path":"apps/web/middleware.ts","note":"Auth for every request"},{"path":"apps/worker/","note":"Background job runner (emails, webhooks, stats)"},{"path":"packages/","note":"Shared code, no HTTP in here"},{"path":"packages/core/","note":"Business rules. Start here to change behaviour","key":true},{"path":"packages/db/","note":"Prisma schema and migrations"}],"dataModel":[{"name":"Team","summary":"A workspace. Billing lives here.","fields":[{"name":"id","type":"uuid"},{"name":"name","type":"text"},{"name":"plan","type":"'free' | 'pro'","note":"Synced from Stripe"},{"name":"stripeCustomerId","type":"text?"}],"relations":[{"to":"User","kind":"has many"},{"to":"Task","kind":"has many"}]},{"name":"User","fields":[{"name":"id","type":"uuid"},{"name":"email","type":"text","note":"Unique"},{"name":"teamId","type":"uuid"}],"relations":[{"to":"Team","kind":"belongs to"}]},{"name":"Task","summary":"The thing people actually care about.","fields":[{"name":"id","type":"uuid"},{"name":"title","type":"text"},{"name":"status","type":"'open' | 'done'"},{"name":"assigneeId","type":"uuid?","ref":"User"},{"name":"completedAt","type":"timestamptz?","note":"Set by the service, never by the client"}],"relations":[{"to":"Team","kind":"belongs to"},{"to":"User","kind":"assigned to"}]}],"concepts":[{"title":"Routes are thin, the service is thick","body":"API routes only parse input and shape the response. Every rule lives in packages/core: limits, permissions, side effects.","analogy":"Routes are the waiter: they take the order and bring the plate. The service is the kitchen.","file":"packages/core/src/tasks/service.ts"},{"title":"Slow things go on the queue","body":"If something talks to the outside world and the user does not need the result right now, it becomes a job.","analogy":"Like dropping a letter in a postbox instead of walking it to the recipient.","code":"await queue.add('task.assigned', { taskId: task.id })","lang":"ts"},{"title":"Optimistic UI","body":"The web app shows your change before the server confirms it, then quietly fixes things up if the server disagrees.","file":"apps/web/components/new-task-form.tsx"}],"quiz":[{"question":"You need to add a rule: “archived teams can’t create tasks”. Where does it go?","options":["apps/web/app/api/tasks/route.ts","packages/core/src/tasks/service.ts","apps/web/middleware.ts","The Prisma schema"],"answer":1,"explain":"Business rules belong in the service, so every caller gets them: API, worker and scripts."},{"question":"Why doesn’t creating a task wait for the email to send?","options":["Emails are sent by the browser","The email is queued and the worker sends it later","Emails are only sent on Pro plans"],"answer":1,"explain":"PR #482 moved emails onto the queue, which cut p95 from 1.8 s to 90 ms."},{"question":"What stops someone faking a Stripe ‘payment succeeded’ event?","options":["The auth middleware","Rate limiting","Webhook signature verification"],"answer":2,"explain":"Added in #475 after an audit. The middleware doesn’t run for Stripe, because Stripe has no session cookie."}],"glossary":[{"term":"Optimistic update","definition":"Showing a change in the UI before the server confirms it."},{"term":"Job","definition":"A unit of background work stored in Redis and run by the worker."},{"term":"Plan limit","definition":"The 50-open-task cap on free teams, enforced in billing/limits.ts."},{"term":"Idempotent","definition":"Safe to run twice: the second run changes nothing."}],"runbook":[{"label":"Install","command":"pnpm install"},{"label":"Start Postgres and Redis","command":"docker compose up -d db redis","note":"Needs Docker Desktop running."},{"label":"Run the app and the worker","command":"pnpm dev","note":"Web on :3000, worker logs in the same terminal."}]}</script>
+<script>
+(() => {
+'use strict';
+// ---- dom.js ----
+// DOM helpers. Every string from the data file goes through text nodes or
+// setAttribute — never innerHTML — so repo content cannot inject markup.
+const SVG_NS = 'http://www.w3.org/2000/svg';
+
+function applyAttrs(el, attrs) {
+  Object.entries(attrs || {}).forEach(([key, value]) => {
+    if (value === null || value === undefined || value === false) return;
+    if (key.startsWith('on') && typeof value === 'function') {
+      el.addEventListener(key.slice(2).toLowerCase(), value);
+    } else if (key === 'dataset') {
+      Object.entries(value).forEach(([name, v]) => { el.dataset[name] = v; });
+    } else {
+      el.setAttribute(key === 'className' ? 'class' : key, value === true ? '' : String(value));
+    }
+  });
+  return el;
+}
+
+function appendChildren(el, children) {
+  children.flat(Infinity).forEach((child) => {
+    if (child === null || child === undefined || child === false) return;
+    el.append(child instanceof Node ? child : document.createTextNode(String(child)));
+  });
+  return el;
+}
+
+// replaceChildren() would stringify skipped (undefined/false) slots.
+function fill(el, ...children) {
+  el.replaceChildren();
+  return appendChildren(el, children);
+}
+
+function h(tag, attrs, ...children) {
+  return appendChildren(applyAttrs(document.createElement(tag), attrs), children);
+}
+
+function s(tag, attrs, ...children) {
+  return appendChildren(applyAttrs(document.createElementNS(SVG_NS, tag), attrs), children);
+}
+
+function list(value) {
+  return Array.isArray(value) ? value : [];
+}
+
+function text(value, fallback = '') {
+  return typeof value === 'string' && value.trim() ? value : fallback;
+}
+
+function truncate(value, max) {
+  return value.length > max ? `${value.slice(0, max - 1)}…` : value;
+}
+
+function reducedMotion() {
+  return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+}
+
+function byId(items) {
+  return new Map(list(items).map((item) => [item.id, item]));
+}
+
+function emit(name, detail) {
+  document.dispatchEvent(new CustomEvent(`explainer:${name}`, { detail }));
+}
+
+function on(name, handler) {
+  document.addEventListener(`explainer:${name}`, (event) => handler(event.detail));
+}
+
+function fileChip(path) {
+  return h('span', { class: 'chip chip-file', title: path }, path);
+}
+
+// Tiny, safe highlighter: tokenises into spans, never parses HTML.
+const CODE_TOKEN = /(\/\/[^\n]*|#[^\n]*|\/\*[\s\S]*?\*\/)|("(?:[^"\\\n]|\\.)*"|'(?:[^'\\\n]|\\.)*'|`(?:[^`\\]|\\.)*`)|\b(const|let|var|function|return|async|await|export|import|from|class|def|if|else|for|while|new|throw|try|catch|func|go|type|interface|struct|public|private|select|insert|update|delete|where|SELECT|INSERT|UPDATE|DELETE|WHERE|FROM)\b/g;
+
+function codeBlock(code, lang) {
+  const pre = h('pre', { class: 'code', 'data-lang': lang || '' });
+  const source = String(code);
+  let last = 0;
+  source.replace(CODE_TOKEN, (match, comment, str, keyword, offset) => {
+    if (offset > last) pre.append(document.createTextNode(source.slice(last, offset)));
+    const cls = comment ? 'cm' : str ? 'st' : 'hl';
+    pre.append(h('span', { class: cls }, match));
+    last = offset + match.length;
+    return match;
+  });
+  if (last < source.length) pre.append(document.createTextNode(source.slice(last)));
+  return pre;
+}
+
+// Motion helpers (Web Animations API). All motion is skipped for users who
+// ask for reduced motion; nothing depends on an animation finishing.
+const EASE_OUT = 'cubic-bezier(0.2, 0.8, 0.2, 1)';
+
+function motion(el, keyframes, options) {
+  if (reducedMotion() || !el.animate) return null;
+  return el.animate(keyframes, { duration: 240, easing: EASE_OUT, ...options });
+}
+
+function slideIn(el, direction = 1) {
+  return motion(el, [{ opacity: 0, transform: `translateX(${direction * 14}px)` }, { opacity: 1, transform: 'none' }]);
+}
+
+function riseIn(el, delay = 0) {
+  return motion(el, [{ opacity: 0, transform: 'translateY(10px)' }, { opacity: 1, transform: 'none' }], { delay, fill: 'backwards' });
+}
+
+function pop(el) {
+  return motion(el, [{ transform: 'scale(1)' }, { transform: 'scale(1.03)' }, { transform: 'scale(1)' }], { duration: 320 });
+}
+
+function shake(el) {
+  return motion(el, [{ transform: 'none' }, { transform: 'translateX(-4px)' }, { transform: 'translateX(4px)' }, { transform: 'translateX(-2px)' }, { transform: 'none' }], { duration: 320, easing: 'ease-in-out' });
+}
+
+// Draw an SVG path from start to end, then reveal its arrowhead.
+function drawPath(path, marker) {
+  const anim = motion(path, [{ strokeDashoffset: 1 }, { strokeDashoffset: 0 }], { duration: 420 });
+  if (!anim) {
+    path.setAttribute('marker-end', marker);
+    return;
+  }
+  path.setAttribute('pathLength', '1');
+  path.style.strokeDasharray = '1';
+  anim.onfinish = () => {
+    path.style.strokeDasharray = '';
+    path.removeAttribute('pathLength');
+    path.setAttribute('marker-end', marker);
+  };
+}
+
+// ---- icons.js ----
+// Flat, gradient-free illustrations for each component kind (viewBox 32x32).
+const PALETTE = {
+  green: { ink: '#58cc02', wash: '#d7ffb8', text: '#58a700' },
+  blue: { ink: '#1cb0f6', wash: '#ddf4ff', text: '#1899d6' },
+  navy: { ink: '#042c60', wash: '#e3e9f3', text: '#042c60' },
+  midnight: { ink: '#000437', wash: '#e6e7f0', text: '#000437' },
+  yellow: { ink: '#ffc800', wash: '#fff5d3', text: '#a56d00' },
+  pink: { ink: '#ff86d0', wash: '#ffe8f6', text: '#b8338a' },
+};
+
+function paletteFor(name) {
+  return PALETTE[name] || PALETTE.green;
+}
+
+const ICON_SHAPES = {
+  user: () => [
+    s('circle', { cx: 16, cy: 11, r: 6, fill: '#ffc800' }),
+    s('path', { d: 'M5 29c0-6.5 4.9-11 11-11s11 4.5 11 11z', fill: '#1cb0f6' }),
+  ],
+  ui: () => [
+    s('rect', { x: 3, y: 5, width: 26, height: 22, rx: 4, fill: '#1cb0f6' }),
+    s('rect', { x: 6, y: 11, width: 20, height: 13, rx: 2, fill: '#fff' }),
+    s('circle', { cx: 7.5, cy: 8, r: 1.3, fill: '#fff' }),
+    s('circle', { cx: 11.5, cy: 8, r: 1.3, fill: '#fff' }),
+    s('rect', { x: 9, y: 14, width: 9, height: 3, rx: 1.5, fill: '#58cc02' }),
+    s('rect', { x: 9, y: 19, width: 14, height: 2, rx: 1, fill: '#e5e5e5' }),
+  ],
+  mobile: () => [
+    s('rect', { x: 8, y: 2, width: 16, height: 28, rx: 4, fill: '#042c60' }),
+    s('rect', { x: 10.5, y: 6, width: 11, height: 18, rx: 2, fill: '#fff' }),
+    s('rect', { x: 12.5, y: 9, width: 7, height: 3, rx: 1.5, fill: '#58cc02' }),
+    s('circle', { cx: 16, cy: 27, r: 1.3, fill: '#fff' }),
+  ],
+  api: () => [
+    s('rect', { x: 4, y: 9, width: 24, height: 14, rx: 7, fill: '#58cc02' }),
+    s('rect', { x: 9, y: 4, width: 3, height: 6, rx: 1.5, fill: '#58a700' }),
+    s('rect', { x: 20, y: 4, width: 3, height: 6, rx: 1.5, fill: '#58a700' }),
+    s('path', { d: 'M11 16h10M18 13l3 3-3 3', stroke: '#fff', 'stroke-width': 2.5, fill: 'none', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }),
+    s('rect', { x: 14.5, y: 23, width: 3, height: 6, rx: 1.5, fill: '#58a700' }),
+  ],
+  service: () => [
+    s('path', { d: 'M16 2l12 7v14l-12 7-12-7V9z', fill: '#042c60' }),
+    s('circle', { cx: 16, cy: 16, r: 5.5, fill: '#fff' }),
+    s('circle', { cx: 16, cy: 16, r: 2.5, fill: '#58cc02' }),
+  ],
+  db: () => [
+    s('path', { d: 'M5 8v16c0 2.8 4.9 5 11 5s11-2.2 11-5V8z', fill: '#1cb0f6' }),
+    s('ellipse', { cx: 16, cy: 8, rx: 11, ry: 5, fill: '#ddf4ff', stroke: '#1cb0f6', 'stroke-width': 2 }),
+    s('path', { d: 'M5 16c0 2.8 4.9 5 11 5s11-2.2 11-5', stroke: '#fff', 'stroke-width': 2, fill: 'none' }),
+  ],
+  queue: () => [
+    s('rect', { x: 3, y: 9, width: 7, height: 14, rx: 3, fill: '#ff86d0' }),
+    s('rect', { x: 12.5, y: 9, width: 7, height: 14, rx: 3, fill: '#ff86d0', opacity: 0.75 }),
+    s('rect', { x: 22, y: 9, width: 7, height: 14, rx: 3, fill: '#ff86d0', opacity: 0.45 }),
+  ],
+  cache: () => [
+    s('circle', { cx: 16, cy: 16, r: 13, fill: '#fff5d3' }),
+    s('path', { d: 'M18 4L8 18h7l-2 10 11-15h-7z', fill: '#ffc800', stroke: '#a56d00', 'stroke-width': 1.2, 'stroke-linejoin': 'round' }),
+  ],
+  external: () => [
+    s('path', { d: 'M9 25a6 6 0 01-.8-11.9A8 8 0 0123.6 11 6.5 6.5 0 0124 25z', fill: '#1cb0f6' }),
+    s('path', { d: 'M12 19h8', stroke: '#fff', 'stroke-width': 2.5, 'stroke-linecap': 'round' }),
+  ],
+  job: () => [
+    s('circle', { cx: 16, cy: 16, r: 13, fill: '#58cc02' }),
+    s('circle', { cx: 16, cy: 16, r: 9.5, fill: '#fff' }),
+    s('path', { d: 'M16 10v6.5l4 2.5', stroke: '#042c60', 'stroke-width': 2.5, fill: 'none', 'stroke-linecap': 'round' }),
+  ],
+  cli: () => [
+    s('rect', { x: 3, y: 5, width: 26, height: 22, rx: 4, fill: '#000437' }),
+    s('path', { d: 'M8 12l4 4-4 4', stroke: '#a5ed6e', 'stroke-width': 2.5, fill: 'none', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }),
+    s('path', { d: 'M15 21h8', stroke: '#fff', 'stroke-width': 2.5, 'stroke-linecap': 'round' }),
+  ],
+  auth: () => [
+    s('path', { d: 'M10 14v-3a6 6 0 0112 0v3', stroke: '#042c60', 'stroke-width': 3, fill: 'none' }),
+    s('rect', { x: 6, y: 13, width: 20, height: 16, rx: 4, fill: '#ffc800' }),
+    s('circle', { cx: 16, cy: 20, r: 2.5, fill: '#042c60' }),
+    s('rect', { x: 15, y: 21, width: 2, height: 4, rx: 1, fill: '#042c60' }),
+  ],
+  storage: () => [
+    s('path', { d: 'M3 9a3 3 0 013-3h7l3 3h10a3 3 0 013 3v12a3 3 0 01-3 3H6a3 3 0 01-3-3z', fill: '#ffc800' }),
+    s('rect', { x: 3, y: 12, width: 26, height: 15, rx: 3, fill: '#ffd84d' }),
+  ],
+  library: () => [
+    s('rect', { x: 4, y: 5, width: 7, height: 23, rx: 2, fill: '#58cc02' }),
+    s('rect', { x: 12.5, y: 8, width: 7, height: 20, rx: 2, fill: '#1cb0f6' }),
+    s('rect', { x: 21, y: 4, width: 7, height: 24, rx: 2, fill: '#ff86d0', transform: 'rotate(8 24.5 16)' }),
+  ],
+  folder: () => [
+    s('path', { d: 'M3 9a3 3 0 013-3h7l3 3h10a3 3 0 013 3v12a3 3 0 01-3 3H6a3 3 0 01-3-3z', fill: '#1cb0f6' }),
+  ],
+  file: () => [
+    s('path', { d: 'M8 3h11l6 6v19a1 1 0 01-1 1H8a1 1 0 01-1-1V4a1 1 0 011-1z', fill: '#e5e5e5' }),
+    s('path', { d: 'M19 3v6h6', fill: '#cfcfcf' }),
+  ],
+  robot: () => [
+    s('rect', { x: 6, y: 9, width: 20, height: 17, rx: 5, fill: '#1cb0f6' }),
+    s('circle', { cx: 12, cy: 17, r: 2.5, fill: '#fff' }),
+    s('circle', { cx: 20, cy: 17, r: 2.5, fill: '#fff' }),
+    s('rect', { x: 15, y: 3, width: 2, height: 6, fill: '#042c60' }),
+    s('circle', { cx: 16, cy: 3, r: 2, fill: '#ffc800' }),
+  ],
+  trophy: () => [
+    s('path', { d: 'M9 4h14v7a7 7 0 01-14 0z', fill: '#ffc800' }),
+    s('path', { d: 'M9 6H5a4 4 0 004 6M23 6h4a4 4 0 01-4 6', stroke: '#ffc800', 'stroke-width': 2.5, fill: 'none' }),
+    s('rect', { x: 14, y: 17, width: 4, height: 6, fill: '#a56d00' }),
+    s('rect', { x: 9, y: 23, width: 14, height: 5, rx: 2, fill: '#58cc02' }),
+  ],
+};
+
+const KIND_ALIASES = { frontend: 'ui', web: 'ui', page: 'ui', server: 'service', worker: 'job', cron: 'job', database: 'db', bucket: 'storage', thirdparty: 'external', package: 'library' };
+
+function icon(kind, attrs = {}) {
+  const key = ICON_SHAPES[kind] ? kind : KIND_ALIASES[kind] || 'service';
+  return s('svg', { viewBox: '0 0 32 32', 'aria-hidden': 'true', focusable: 'false', ...attrs }, ICON_SHAPES[key]());
+}
+
+function brandMark() {
+  return s('svg', { viewBox: '0 0 32 32', 'aria-hidden': 'true' },
+    s('rect', { x: 2, y: 2, width: 28, height: 28, rx: 9, fill: '#58cc02' }),
+    s('path', { d: 'M9 21l5-10 4 7 2-3 3 6', stroke: '#fff', 'stroke-width': 3, fill: 'none', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }),
+    s('circle', { cx: 23, cy: 11, r: 2.5, fill: '#ffc800' }));
+}
+
+// ---- map.js ----
+// Chapter: architecture map. Layers are columns, nodes are pressable cards,
+// edges are an SVG overlay redrawn whenever the layout changes.
+function renderMap(data, mount) {
+  const layers = list(data.layers);
+  const nodes = list(data.nodes);
+  const edges = list(data.edges);
+  const nodeIndex = byId(nodes);
+  const changedIds = new Set(list(data.changes).flatMap((change) => list(change.nodes)));
+
+  const svg = s('svg', { class: 'map-edges', 'aria-hidden': 'true' });
+  const grid = h('div', { class: 'map-grid', style: `--cols:${Math.max(layers.length, 1)}` },
+    layers.map((layer) => mapColumn(layer, nodes, changedIds, (id) => select(id))));
+  const canvas = h('div', { class: 'map-canvas', style: `--cols:${Math.max(layers.length, 1)}` }, svg, grid);
+  const detail = h('aside', { class: 'map-detail card', 'aria-live': 'polite' });
+  let selectedId = null;
+
+  function select(id) {
+    selectedId = selectedId === id ? null : id;
+    paintSelection();
+    renderDetail();
+  }
+
+  function related(id) {
+    return edges.filter((edge) => edge.from === id || edge.to === id);
+  }
+
+  function paintSelection() {
+    canvas.classList.toggle('has-selection', Boolean(selectedId));
+    canvas.classList.remove('is-changes');
+    const neighbours = new Set(selectedId ? related(selectedId).flatMap((e) => [e.from, e.to]) : []);
+    grid.querySelectorAll('.node').forEach((el) => {
+      el.classList.toggle('is-selected', el.dataset.node === selectedId);
+      el.classList.toggle('is-related', neighbours.has(el.dataset.node));
+      el.setAttribute('aria-pressed', String(el.dataset.node === selectedId));
+    });
+    svg.querySelectorAll('[data-edge]').forEach((el) => {
+      const [from, to] = el.dataset.edge.split('→');
+      const active = from === selectedId || to === selectedId;
+      el.querySelectorAll('path, text').forEach((part) => part.classList.toggle('is-active', active));
+      el.querySelector('path').setAttribute('marker-end', active ? 'url(#arrow-active)' : 'url(#arrow)');
+    });
+  }
+
+  function renderDetail() {
+    fill(detail, ...(selectedId ? nodeDetail(nodeIndex.get(selectedId)) : emptyDetail()));
+  }
+
+  function emptyDetail() {
+    return [h('div', { class: 'detail-main' },
+      h('div', { class: 'detail-label', style: 'margin-top:0' }, 'Tip'),
+      h('h3', null, 'Tap any box above'),
+      h('p', null, 'You will see what it does, which files hold it, and who it talks to. Tap it again to clear.'))];
+  }
+
+  function nodeDetail(node) {
+    const layer = layers.find((l) => l.id === node.layer);
+    const links = related(node.id);
+    const flows = list(data.flows).filter((flow) => list(flow.steps).some((st) => st.from === node.id || st.to === node.id));
+    return [h('div', { class: 'detail-main' },
+      h('div', { class: 'step-top' }, h('span', { class: 'tag' }, text(layer && layer.label, node.layer)), node.kind && h('span', { class: 'tag tag-request' }, node.kind)),
+      h('h3', null, node.label),
+      h('p', null, text(node.summary, 'No summary yet.')),
+      node.tech && h('p', { class: 'detail-label' }, node.tech),
+      list(node.files).length > 0 && [h('div', { class: 'detail-label' }, 'Lives in'), h('div', { class: 'files' }, list(node.files).map(fileChip))]),
+    h('div', { class: 'detail-side' },
+      links.length > 0 && [h('div', { class: 'detail-label' }, 'Talks to'), h('ul', { class: 'rel' }, links.map((edge) => relationItem(edge, node.id)))],
+      flows.length > 0 && [h('div', { class: 'detail-label' }, 'Shows up in'), h('ul', { class: 'rel' }, flows.map((flow) => h('li', null,
+        h('button', { class: 'link', type: 'button', onclick: () => emit('open-flow', { flowId: flow.id }) }, `▶ ${flow.title}`))))]),
+    ];
+  }
+
+  function relationItem(edge, selfId) {
+    const otherId = edge.from === selfId ? edge.to : edge.from;
+    const other = nodeIndex.get(otherId);
+    const direction = edge.from === selfId ? '→' : '←';
+    return h('li', null, h('span', { class: 'arrow-glyph' }, direction),
+      h('button', { class: 'link', type: 'button', onclick: () => select(otherId) }, other ? other.label : otherId),
+      edge.label && h('span', { class: 'tag' }, edge.label));
+  }
+
+  function drawEdges() {
+    const box = canvas.getBoundingClientRect();
+    svg.setAttribute('viewBox', `0 0 ${box.width} ${box.height}`);
+    const defs = s('defs', null, arrowMarker('arrow', '#e5e5e5'), arrowMarker('arrow-active', '#1cb0f6'));
+    const paths = edges.map((edge) => edgeShape(edge, box)).filter(Boolean);
+    fill(svg, defs, ...paths);
+    paintSelection();
+    if (canvas.dataset.changes === 'on') showChanges();
+  }
+
+  function edgeShape(edge, box) {
+    const fromEl = grid.querySelector(`[data-node="${CSS.escape(edge.from)}"]`);
+    const toEl = grid.querySelector(`[data-node="${CSS.escape(edge.to)}"]`);
+    if (!fromEl || !toEl) return null;
+    const a = relativeRect(fromEl, box);
+    const b = relativeRect(toEl, box);
+    const d = connectorPath(a, b);
+    const key = `${edge.from}→${edge.to}`;
+    const mid = { x: (a.cx + b.cx) / 2, y: (a.cy + b.cy) / 2 };
+    return s('g', { 'data-edge': key },
+      s('path', { class: `edge${edge.kind === 'async' ? ' is-async' : ''}`, d, 'marker-end': 'url(#arrow)' }),
+      edge.label && s('text', { class: 'edge-label', x: mid.x, y: mid.y - 6, 'text-anchor': 'middle' }, truncate(edge.label, 28)));
+  }
+
+  function showChanges() {
+    canvas.classList.remove('has-selection');
+    canvas.classList.add('is-changes');
+    grid.querySelectorAll('.node').forEach((el) => el.classList.toggle('is-changed', changedIds.has(el.dataset.node)));
+  }
+
+  on('highlight-changes', ({ enabled }) => {
+    canvas.dataset.changes = enabled ? 'on' : 'off';
+    selectedId = null;
+    renderDetail();
+    if (enabled) showChanges(); else paintSelection();
+    canvas.scrollIntoView({ block: 'center' });
+  });
+
+  renderDetail();
+  mount.append(
+    h('div', { class: 'map-shell' }, h('div', { class: 'map-scroll' }, canvas), detail),
+    h('div', { class: 'map-legend' },
+      h('span', null, h('i'), 'Calls / reads'),
+      h('span', null, h('i', { class: 'dash' }), 'Async / events'),
+      changedIds.size > 0 && h('span', null, h('span', { class: 'tag tag-new' }, 'new'), 'Changed recently')),
+  );
+  const redraw = () => window.requestAnimationFrame(drawEdges);
+  new ResizeObserver(redraw).observe(canvas);
+  if (document.fonts) document.fonts.ready.then(redraw);
+}
+
+function mapColumn(layer, nodes, changedIds, onSelect) {
+  const colors = paletteFor(layer.color);
+  const layerNodes = nodes.filter((node) => node.layer === layer.id);
+  return h('div', { class: 'map-col', style: `--layer:${colors.ink};--layer-wash:${colors.wash};--layer-ink:${colors.text}` },
+    h('div', { class: 'map-col-head' }, layer.label),
+    layerNodes.map((node) => h('button', {
+      class: 'node', type: 'button', 'data-node': node.id, 'aria-pressed': 'false', onclick: () => onSelect(node.id),
+    },
+    changedIds.has(node.id) && h('span', { class: 'node-badge tag tag-new' }, 'new'),
+    icon(node.kind),
+    h('span', { class: 'node-text' }, h('span', { class: 'node-label' }, node.label), node.tech && h('span', { class: 'node-tech' }, node.tech)))));
+}
+
+function relativeRect(el, box) {
+  const r = el.getBoundingClientRect();
+  const left = r.left - box.left;
+  const top = r.top - box.top;
+  return { left, top, right: left + r.width, bottom: top + r.height, cx: left + r.width / 2, cy: top + r.height / 2 };
+}
+
+function connectorPath(a, b) {
+  const horizontal = Math.abs(b.cx - a.cx) > Math.abs(b.cy - a.cy);
+  if (horizontal) {
+    const forward = b.cx > a.cx;
+    const x1 = forward ? a.right : a.left;
+    const x2 = forward ? b.left - 4 : b.right + 4;
+    const bend = (x2 - x1) / 2;
+    return `M${x1},${a.cy} C${x1 + bend},${a.cy} ${x2 - bend},${b.cy} ${x2},${b.cy}`;
+  }
+  const down = b.cy > a.cy;
+  const y1 = down ? a.bottom : a.top;
+  const y2 = down ? b.top - 4 : b.bottom + 4;
+  const bend = (y2 - y1) / 2;
+  return `M${a.cx},${y1} C${a.cx},${y1 + bend} ${b.cx},${y2 - bend} ${b.cx},${y2}`;
+}
+
+function arrowMarker(id, color) {
+  return s('marker', { id, viewBox: '0 0 10 10', refX: 8, refY: 5, markerWidth: 10, markerHeight: 10, markerUnits: 'userSpaceOnUse', orient: 'auto-start-reverse' },
+    s('path', { d: 'M0,0 L10,5 L0,10 z', fill: color }));
+}
+
+// ---- models.js ----
+// Chapter: the data. An entity-relationship diagram (same interaction as the
+// architecture map) plus a roomy field table for the selected entity.
+const CARDINALITY = {
+  'has many': ['1', 'N'],
+  'has one': ['1', '1'],
+  'belongs to': ['N', '1'],
+  'many to many': ['N', 'M'],
+};
+
+// One edge per pair: "Team has many User" and "User belongs to Team" are the
+// same line, so keep the first and drop its mirror.
+function relationEdges(models) {
+  const names = new Set(models.map((m) => m.name));
+  const seen = new Set();
+  return models.flatMap((model) => list(model.relations)
+    .filter((rel) => names.has(rel.to) && rel.to !== model.name)
+    .map((rel) => {
+      const key = [model.name, rel.to].sort().join('|');
+      if (seen.has(key)) return null;
+      seen.add(key);
+      const kind = text(rel.kind, 'relates to').toLowerCase();
+      return { from: model.name, to: rel.to, kind, ends: CARDINALITY[kind] || ['', ''] };
+    })
+    .filter(Boolean));
+}
+
+// Zig-zag order: start at the most connected entity, then walk neighbours so
+// related boxes sit next to each other.
+function entityOrder(models, edges) {
+  const degree = (name) => edges.filter((e) => e.from === name || e.to === name).length;
+  const byDegree = [...models].sort((a, b) => degree(b.name) - degree(a.name));
+  const order = [];
+  const visit = (model) => {
+    if (!model || order.includes(model)) return;
+    order.push(model);
+    edges.filter((e) => e.from === model.name || e.to === model.name)
+      .map((e) => models.find((m) => m.name === (e.from === model.name ? e.to : e.from)))
+      .forEach(visit);
+  };
+  byDegree.forEach(visit);
+  return order;
+}
+
+// PK: named "id" or noted as primary. FK: explicit `ref`, or "<model>Id" / "<model>_id".
+// Ids of outside systems (stripeCustomerId) are not FKs, so no suffix guessing.
+function fieldBadges(field, modelNames) {
+  const name = text(field.name);
+  const lower = name.toLowerCase();
+  const isPk = name === 'id' || /\bprimary\b/i.test(text(field.note));
+  const named = [...modelNames].find((m) => lower === `${m.toLowerCase()}id` || lower === `${m.toLowerCase()}_id`);
+  const fkTarget = modelNames.has(field.ref) ? field.ref : named;
+  return { isPk, fkTarget, isFk: Boolean(fkTarget) };
+}
+
+function renderModels(data, mount) {
+  const models = list(data.dataModel);
+  const edges = relationEdges(models);
+  const ordered = entityOrder(models, edges);
+  const modelNames = new Set(models.map((m) => m.name));
+  const svg = s('svg', { class: 'map-edges', 'aria-hidden': 'true' });
+  const grid = h('div', { class: 'er-grid', style: `--er-cols:${ordered.length + 1}` },
+    ordered.map((model, i) => entityBox(model, i, modelNames, () => select(model.name))));
+  const canvas = h('div', { class: 'map-canvas er-canvas', style: `--er-cols:${ordered.length + 1}` }, svg, grid);
+  const detail = h('div', { class: 'card er-detail', 'aria-live': 'polite' });
+  let selected = ordered[0] ? ordered[0].name : null;
+
+  function select(name) {
+    selected = name;
+    paint();
+    fill(detail, ...modelDetail(models.find((m) => m.name === name)));
+  }
+
+  function paint() {
+    const related = new Set(edges.filter((e) => e.from === selected || e.to === selected).flatMap((e) => [e.from, e.to]));
+    canvas.classList.add('has-selection');
+    grid.querySelectorAll('.entity').forEach((el) => {
+      el.classList.toggle('is-selected', el.dataset.entity === selected);
+      el.classList.toggle('is-related', related.has(el.dataset.entity));
+      el.setAttribute('aria-pressed', String(el.dataset.entity === selected));
+    });
+    svg.querySelectorAll('[data-edge]').forEach((g) => {
+      const [from, to] = g.dataset.edge.split('→');
+      const active = from === selected || to === selected;
+      g.querySelectorAll('path, text').forEach((part) => part.classList.toggle('is-active', active));
+    });
+  }
+
+  function modelDetail(model) {
+    if (!model) return [];
+    const rels = edges.filter((e) => e.from === model.name || e.to === model.name);
+    return [
+      h('div', { class: 'er-detail-head' },
+        h('h3', null, icon('db'), model.name),
+        model.summary && h('p', null, model.summary)),
+      h('div', { class: 'er-fields', role: 'table', 'aria-label': `${model.name} fields` },
+        h('div', { class: 'er-row er-row-head', role: 'row' },
+          h('span', { role: 'columnheader' }, 'Field'), h('span', { role: 'columnheader' }, 'Type'), h('span', { role: 'columnheader' }, 'Meaning')),
+        list(model.fields).map((field) => fieldRow(field, modelNames, select))),
+      rels.length > 0 && h('div', { class: 'er-rels' },
+        h('div', { class: 'detail-label' }, 'Relationships'),
+        h('ul', { class: 'rel' }, rels.map((edge) => {
+          const other = edge.from === model.name ? edge.to : edge.from;
+          const [a, b] = edge.from === model.name ? edge.ends : [...edge.ends].reverse();
+          return h('li', null,
+            h('span', { class: 'tag' }, `${a || '?'} : ${b || '?'}`),
+            h('span', null, `${model.name} ${edge.from === model.name ? edge.kind : 'is linked from'} `),
+            h('button', { class: 'link', type: 'button', onclick: () => select(other) }, other));
+        }))),
+    ];
+  }
+
+  function drawEdges() {
+    const box = canvas.getBoundingClientRect();
+    svg.setAttribute('viewBox', `0 0 ${box.width} ${box.height}`);
+    fill(svg, s('defs', null), edges.map((edge) => relationShape(edge, grid, box)).filter(Boolean));
+    paint();
+  }
+
+  if (!models.length) return;
+  mount.append(h('div', { class: 'map-scroll' }, canvas), detail);
+  select(selected);
+  const redraw = () => window.requestAnimationFrame(drawEdges);
+  new ResizeObserver(redraw).observe(canvas);
+  if (document.fonts) document.fonts.ready.then(redraw);
+}
+
+function entityBox(model, index, modelNames, onSelect) {
+  // Zig-zag: each box spans two tracks and steps one track right, alternating rows.
+  const row = index % 2;
+  const col = index + 1;
+  const keys = list(model.fields).filter((f) => {
+    const b = fieldBadges(f, modelNames);
+    return b.isPk || b.isFk;
+  }).slice(0, 4);
+  return h('button', {
+    class: 'entity', type: 'button', 'data-entity': model.name, 'aria-pressed': 'false',
+    style: `grid-column:${col} / span 2;grid-row:${row + 1}`, onclick: onSelect,
+  },
+  h('span', { class: 'entity-head' }, icon('db'), h('span', { class: 'entity-name' }, model.name), h('span', { class: 'entity-count' }, `${list(model.fields).length} fields`)),
+  keys.length > 0 && h('span', { class: 'entity-keys' }, keys.map((f) => {
+    const b = fieldBadges(f, modelNames);
+    return h('span', { class: 'entity-key' }, h('span', { class: `key-badge ${b.isPk ? 'is-pk' : 'is-fk'}` }, b.isPk ? 'PK' : 'FK'), f.name);
+  })));
+}
+
+function fieldRow(field, modelNames, select) {
+  const b = fieldBadges(field, modelNames);
+  return h('div', { class: 'er-row', role: 'row' },
+    h('span', { class: 'er-name', role: 'cell' },
+      h('code', null, field.name),
+      b.isPk && h('span', { class: 'key-badge is-pk' }, 'PK'),
+      b.isFk && h('span', { class: 'key-badge is-fk' }, 'FK'),
+      b.fkTarget && h('button', { class: 'link er-fk', type: 'button', onclick: () => select(b.fkTarget) }, `→ ${b.fkTarget}`)),
+    h('span', { class: 'er-type', role: 'cell' }, h('code', null, text(field.type, '—'))),
+    h('span', { class: 'er-note', role: 'cell' }, text(field.note, '')));
+}
+
+function relationShape(edge, grid, box) {
+  const fromEl = grid.querySelector(`[data-entity="${CSS.escape(edge.from)}"]`);
+  const toEl = grid.querySelector(`[data-entity="${CSS.escape(edge.to)}"]`);
+  if (!fromEl || !toEl) return null;
+  const a = relativeRect(fromEl, box);
+  const b = relativeRect(toEl, box);
+  const d = connectorPath(a, b);
+  const nums = d.match(/-?\d+(\.\d+)?/g).map(Number);
+  const [x1, y1] = nums;
+  const [x2, y2] = nums.slice(-2);
+  const nudge = (x, y, tx, ty) => {
+    const len = Math.hypot(tx - x, ty - y) || 1;
+    return { x: x + ((tx - x) / len) * 18 + 8, y: y + ((ty - y) / len) * 18 - 4 };
+  };
+  const startLabel = nudge(x1, y1, x2, y2);
+  const endLabel = nudge(x2, y2, x1, y1);
+  return s('g', { 'data-edge': `${edge.from}→${edge.to}` },
+    s('path', { class: 'edge', d }),
+    s('text', { class: 'er-card', x: startLabel.x, y: startLabel.y, 'text-anchor': 'middle' }, edge.ends[0]),
+    s('text', { class: 'er-card', x: endLabel.x, y: endLabel.y, 'text-anchor': 'middle' }, edge.ends[1]),
+    s('text', { class: 'edge-label', x: (x1 + x2) / 2, y: (y1 + y2) / 2 - 8, 'text-anchor': 'middle' }, edge.kind));
+}
+
+// ---- flow.js ----
+// Chapter: end-to-end flow player. A sequence diagram you step through one
+// hop at a time, Brilliant-style: one idea per screen, a big Continue button.
+const SEQ = { minCol: 130, maxCol: 220, head: 70, top: 40, row: 58, pad: 20 };
+const DASHED_KINDS = new Set(['response', 'async']);
+
+function renderFlows(data, mount) {
+  const flows = list(data.flows);
+  if (!flows.length) {
+    mount.append(h('p', { class: 'empty' }, 'No flows traced yet.'));
+    return;
+  }
+  const nodeIndex = byId(data.nodes);
+  let state = { flowIndex: 0, stepIndex: 0, finished: false, direction: 1 };
+
+  const tabs = h('div', { class: 'flow-tabs', role: 'tablist', 'aria-label': 'Flows' });
+  const meta = h('div', { class: 'flow-meta' });
+  const headsWrap = h('div', { class: 'seq-heads-wrap' });
+  const bodyWrap = h('div', { class: 'seq-body' });
+  const seqWrap = h('div', { class: 'seq-wrap seq', 'aria-label': 'Sequence diagram' }, headsWrap, bodyWrap);
+  // The body scrolls sideways only; the sticky header strip follows it.
+  bodyWrap.addEventListener('scroll', () => {
+    if (headsWrap.firstElementChild) headsWrap.firstElementChild.style.transform = `translateX(${-bodyWrap.scrollLeft}px)`;
+  }, { passive: true });
+  const panel = h('div', { class: 'card step-card', 'aria-live': 'polite' });
+  const root = h('div', { class: 'flow-player' }, tabs, meta, h('div', { class: 'flow-layout' }, seqWrap, panel));
+  let lastWidth = 0;
+  new ResizeObserver(() => {
+    if (Math.abs(seqWrap.clientWidth - lastWidth) > 24) { lastWidth = seqWrap.clientWidth; render(); }
+  }).observe(seqWrap);
+
+  function setState(next) {
+    state = { ...state, ...next };
+    render({ animate: true });
+  }
+
+  function go(stepIndex) {
+    const steps = list(flows[state.flowIndex].steps);
+    if (stepIndex >= steps.length) return setState({ finished: true, direction: 1 });
+    return setState({ stepIndex: Math.max(0, stepIndex), finished: false, direction: stepIndex >= state.stepIndex ? 1 : -1 });
+  }
+
+  function render({ animate = false } = {}) {
+    const flow = flows[state.flowIndex];
+    fill(tabs, ...flows.map((f, i) => h('button', {
+      class: 'chip flow-tab', type: 'button', role: 'tab', 'aria-selected': String(i === state.flowIndex),
+      onclick: () => setState({ flowIndex: i, stepIndex: 0, finished: false }),
+    }, `${i + 1}. ${f.title}`)));
+    fill(meta,
+      flow.trigger && h('span', { class: 'chip' }, '⚡ ', flow.trigger),
+      h('span', { class: 'chip' }, `${list(flow.steps).length} steps`),
+      flow.summary && h('p', { style: 'flex-basis:100%' }, flow.summary),
+    );
+    const diagram = sequenceDiagram(flow, nodeIndex, state.finished ? list(flow.steps).length : state.stepIndex, go, bodyWrap.clientWidth);
+    fill(headsWrap, diagram.heads);
+    fill(bodyWrap, diagram.body);
+    centerCurrentStep(bodyWrap, animate);
+    fill(panel, ...(state.finished ? finishedPanel(flow) : stepPanel(flow)));
+    const current = diagram.body.querySelector('.seq-step.is-current .arrow');
+    if (current) {
+      const marker = current.dataset.marker;
+      if (animate) drawPath(current, marker); else current.setAttribute('marker-end', marker);
+    }
+    if (animate) slideIn(panel.firstElementChild, state.direction);
+    if (animate && !state.finished) revealCurrentStep(diagram.body);
+    if (animate && state.finished) pop(panel.querySelector('.trophy'));
+  }
+
+  function stepPanel(flow) {
+    const steps = list(flow.steps);
+    const step = steps[state.stepIndex];
+    const from = nodeIndex.get(step.from);
+    const to = nodeIndex.get(step.to);
+    const last = state.stepIndex === steps.length - 1;
+    return [h('div', { class: 'step-body' }, h('div', { class: 'step-text' },
+      h('div', { class: 'step-top' },
+        h('span', { class: 'step-count' }, `Step ${state.stepIndex + 1} of ${steps.length}`),
+        step.kind && h('span', { class: `tag tag-${step.kind}` }, step.kind)),
+      h('div', { class: 'step-route' },
+        from && icon(from.kind), text(from && from.label, step.from),
+        h('span', { class: 'arrow-glyph', 'aria-hidden': 'true' }, step.from === step.to ? '↺' : '→'),
+        step.from !== step.to && [to && icon(to.kind), text(to && to.label, step.to)]),
+      h('h3', null, step.label),
+      step.detail && h('p', null, step.detail),
+      step.why && h('div', { class: 'callout' }, h('b', null, 'Why it works this way'), step.why)),
+      (step.file || step.code) && h('div', { class: 'step-code' },
+        step.file && h('div', { class: 'code-head', style: 'margin-top:0' }, fileChip(step.file)),
+        step.code && codeBlock(step.code, step.lang))),
+      h('div', { class: 'step-controls' },
+        h('button', { class: 'btn btn-ghost btn-sm', type: 'button', disabled: state.stepIndex === 0, onclick: () => go(state.stepIndex - 1) }, 'Back'),
+        stepDots(steps.length, state.stepIndex, go),
+        h('button', { class: 'btn btn-primary', type: 'button', onclick: () => go(state.stepIndex + 1) }, last ? 'Finish' : 'Continue')),
+      h('p', { class: 'kbd-hint' }, 'Tip: use ', h('kbd', null, '←'), ' ', h('kbd', null, '→'), ' to step through.'),
+    ];
+  }
+
+  function finishedPanel(flow) {
+    const steps = list(flow.steps);
+    const actors = new Set(steps.flatMap((st) => [st.from, st.to]));
+    const nextIndex = state.flowIndex + 1;
+    return [h('div', { class: 'flow-done' },
+      icon('trophy', { class: 'trophy' }),
+      h('h3', null, 'Flow complete!'),
+      h('p', null, `You followed “${flow.title}” through ${steps.length} steps and ${actors.size} parts of the system.`),
+      h('div', { class: 'btn-row', style: 'justify-content:center' },
+        h('button', { class: 'btn btn-ghost', type: 'button', onclick: () => go(0) }, 'Replay'),
+        nextIndex < flows.length && h('button', { class: 'btn btn-primary', type: 'button', onclick: () => setState({ flowIndex: nextIndex, stepIndex: 0, finished: false }) }, 'Next flow')))];
+  }
+
+  root.addEventListener('keydown', (event) => {
+    if (event.target.closest('input, textarea')) return;
+    if (event.key === 'ArrowRight') { event.preventDefault(); go(state.stepIndex + 1); }
+    if (event.key === 'ArrowLeft') { event.preventDefault(); go(state.finished ? state.stepIndex : state.stepIndex - 1); }
+  });
+
+  on('open-flow', ({ flowId }) => {
+    const index = flows.findIndex((f) => f.id === flowId);
+    if (index < 0) return;
+    setState({ flowIndex: index, stepIndex: 0, finished: false });
+    root.scrollIntoView({ block: 'start' });
+  });
+
+  render();
+  mount.append(root);
+}
+
+function stepDots(count, current, go) {
+  if (count > 14) return h('span', { class: 'step-count' }, `${current + 1} / ${count}`);
+  return h('div', { class: 'step-dots' }, Array.from({ length: count }, (_, i) => h('button', {
+    type: 'button', class: i === current ? 'is-current' : i < current ? 'is-done' : '', 'aria-label': `Go to step ${i + 1}`, onclick: () => go(i),
+  })));
+}
+
+function flowActors(steps) {
+  return [...new Set(steps.flatMap((step) => [step.from, step.to]))];
+}
+
+// Two SVGs share one scroll box: a sticky strip of actor heads and the steps.
+function sequenceDiagram(flow, nodeIndex, currentIndex, go, available) {
+  const steps = list(flow.steps);
+  const actors = flowActors(steps);
+  const fit = ((available || 0) - SEQ.pad * 2) / Math.max(actors.length, 1);
+  const col = Math.min(SEQ.maxCol, Math.max(SEQ.minCol, fit));
+  const width = SEQ.pad * 2 + actors.length * col;
+  const height = SEQ.top + steps.length * SEQ.row;
+  const xOf = (id) => SEQ.pad + actors.indexOf(id) * col + col / 2;
+  const headW = Math.min(col - 16, 170);
+  const chars = Math.floor((headW - 52) / 7.5);
+  const heads = s('svg', { class: 'seq-heads', viewBox: `0 0 ${width} ${SEQ.head}`, width, height: SEQ.head, 'aria-hidden': 'true' });
+  const body = s('svg', { viewBox: `0 0 ${width} ${height}`, width, height, role: 'img', 'aria-label': `${flow.title}: ${steps.length} steps` });
+
+  actors.forEach((id) => {
+    const node = nodeIndex.get(id);
+    const x = xOf(id);
+    heads.append(
+      s('rect', { x: x - headW / 2, y: 14, width: headW, height: 50, rx: 12, fill: '#e5e5e5' }),
+      s('rect', { x: x - headW / 2, y: 10, width: headW, height: 50, rx: 12, fill: '#fff', stroke: '#e5e5e5', 'stroke-width': 2 }),
+      icon(node ? node.kind : 'service', { x: x - headW / 2 + 10, y: 21, width: 28, height: 28 }),
+      s('text', { class: 'seq-head-label', x: x - headW / 2 + 44, y: 40 }, truncate(node ? node.label : id, chars), s('title', null, node ? node.label : id)),
+    );
+    body.append(s('line', { class: 'seq-lifeline', x1: x, x2: x, y1: 0, y2: height }));
+  });
+
+  steps.forEach((step, i) => body.append(sequenceStep(step, i, currentIndex, xOf, width, go, col)));
+  return { heads, body };
+}
+
+function sequenceStep(step, i, currentIndex, xOf, width, go, col) {
+  const y = SEQ.top + i * SEQ.row;
+  const status = i < currentIndex ? 'is-done' : i === currentIndex ? 'is-current' : 'is-todo';
+  const x1 = xOf(step.from);
+  const x2 = xOf(step.to);
+  const self = step.from === step.to;
+  const dir = x2 >= x1 ? 1 : -1;
+  const d = self
+    ? `M${x1},${y} h44 v18 h-40`
+    : `M${x1 + dir * 12},${y} L${x2 - dir * 8},${y}`;
+  const labelX = self ? x1 + 52 : (x1 + x2) / 2;
+  const group = s('g', {
+    class: `seq-step ${status}${DASHED_KINDS.has(step.kind) ? ' is-dashed' : ''}`,
+    role: 'button', tabindex: '0', 'aria-label': `Step ${i + 1}: ${step.label}`,
+    onclick: () => go(i),
+    onkeydown: (event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); go(i); } },
+  },
+  s('rect', { class: 'hit', x: 4, y: y - 30, width: width - 8, height: SEQ.row - 4, rx: 10 }),
+  s('path', status === 'is-current'
+    ? { class: 'arrow', d, 'data-marker': `url(#seq-arrow-${status})` }
+    : { class: 'arrow', d, 'marker-end': `url(#seq-arrow-${status})` }),
+  s('circle', { class: 'badge-bg', cx: x1, cy: y, r: 11 }),
+  s('text', { class: 'badge-num', x: x1, y: y + 4, 'text-anchor': 'middle' }, String(i + 1)),
+  s('text', { class: 'label', x: labelX, y: y - 10, 'text-anchor': self ? 'start' : 'middle' },
+    truncate(step.label, Math.max(14, Math.floor(((self ? col : Math.abs(x2 - x1)) - 16) / 6.6))), s('title', null, step.label)));
+
+  if (i === 0) group.prepend(seqMarkers());
+  if (status === 'is-current' && !reducedMotion()) {
+    // One pass along the arrow after it draws, then fade — no endless loop.
+    group.append(s('circle', { class: 'seq-dot', r: 6, opacity: 0 },
+      s('set', { attributeName: 'opacity', to: 1, begin: '0.3s' }),
+      s('animateMotion', { dur: '0.6s', begin: '0.3s', fill: 'freeze', path: d, calcMode: 'spline', keyTimes: '0;1', keySplines: '0.4 0 0.2 1' }),
+      s('animate', { attributeName: 'opacity', from: 1, to: 0, begin: '0.9s', dur: '0.3s', fill: 'freeze' })));
+  }
+  return group;
+}
+
+function seqMarkers() {
+  const marker = (status, color) => s('marker', { id: `seq-arrow-${status}`, viewBox: '0 0 10 10', refX: 7, refY: 5, markerWidth: 11, markerHeight: 11, markerUnits: 'userSpaceOnUse', orient: 'auto' },
+    s('path', { d: 'M0,0 L10,5 L0,10 z', fill: color }));
+  return s('defs', null, marker('is-done', '#777777'), marker('is-current', '#58cc02'), marker('is-todo', '#e5e5e5'));
+}
+
+// Only on reader actions: bring the active hop into view without fighting
+// the page's own scrolling.
+function centerCurrentStep(bodyWrap, animate) {
+  const badge = bodyWrap.querySelector('.seq-step.is-current .badge-bg');
+  if (!badge) return;
+  const left = Number(badge.getAttribute('cx')) - bodyWrap.clientWidth / 3;
+  bodyWrap.scrollTo({ left: Math.max(0, left), behavior: animate && !reducedMotion() ? 'smooth' : 'auto' });
+}
+
+function revealCurrentStep(diagram) {
+  const current = diagram.querySelector('.seq-step.is-current');
+  if (!current) return;
+  const box = current.getBoundingClientRect();
+  const headerBottom = 200;
+  if (box.top < headerBottom || box.bottom > window.innerHeight - 24) {
+    current.scrollIntoView({ block: 'center', behavior: reducedMotion() ? 'auto' : 'smooth' });
+  }
+}
+
+// ---- changes.js ----
+// Chapter: what changed and why. Built for repos where many humans and
+// agents merge every day — each change carries its reason and the parts of
+// the system it touched, so readers can re-sync their mental model fast.
+const AUTHOR_FILTERS = [
+  { id: 'all', label: 'Everyone' },
+  { id: 'agent', label: 'Agents' },
+  { id: 'human', label: 'Humans' },
+];
+
+function renderChanges(data, mount) {
+  const changes = [...list(data.changes)].sort((a, b) => String(b.date).localeCompare(String(a.date)));
+  if (!changes.length) {
+    mount.append(h('p', { class: 'empty' }, 'No recent changes recorded.'));
+    return;
+  }
+  const nodeIndex = byId(data.nodes);
+  let state = { author: 'all', kind: 'all', onMap: false };
+
+  const kinds = ['all', ...new Set(changes.map((c) => c.kind).filter(Boolean))];
+  const toolbar = h('div', { class: 'changes-toolbar' });
+  const timeline = h('ol', { class: 'timeline' });
+
+  function setState(next) {
+    state = { ...state, ...next };
+    render();
+    [...timeline.children].slice(0, 8).forEach((item, i) => riseIn(item, i * 35));
+  }
+
+  function visible() {
+    return changes.filter((c) => (state.author === 'all' || c.authorType === state.author)
+      && (state.kind === 'all' || c.kind === state.kind));
+  }
+
+  function render() {
+    fill(toolbar,
+      h('div', { class: 'filter-group', role: 'group', 'aria-label': 'Filter by author' },
+        AUTHOR_FILTERS.map((f) => filterChip(f.label, state.author === f.id, () => setState({ author: f.id })))),
+      kinds.length > 2 && h('div', { class: 'filter-group', role: 'group', 'aria-label': 'Filter by type' },
+        kinds.map((k) => filterChip(k === 'all' ? 'All types' : k, state.kind === k, () => setState({ kind: k })))),
+      h('button', {
+        class: `btn btn-sm ${state.onMap ? 'btn-blue' : 'btn-ghost'}`, type: 'button', 'aria-pressed': String(state.onMap),
+        onclick: () => { emit('highlight-changes', { enabled: !state.onMap }); setState({ onMap: !state.onMap }); },
+      }, state.onMap ? 'Hide on map' : 'Show on map'),
+    );
+    const items = visible();
+    fill(timeline, ...(items.length
+      ? items.map((change) => changeItem(change, nodeIndex))
+      : [h('li', { class: 'empty' }, 'Nothing matches these filters.')]));
+  }
+
+  render();
+  mount.append(changeStats(changes), toolbar, timeline);
+}
+
+function filterChip(label, pressed, onclick) {
+  return h('button', { class: 'chip', type: 'button', 'aria-pressed': String(pressed), onclick }, label);
+}
+
+function changeStats(changes) {
+  const agents = changes.filter((c) => c.authorType === 'agent').length;
+  const touched = new Set(changes.flatMap((c) => list(c.nodes))).size;
+  const stat = (value, label) => h('div', { class: 'stat' }, h('b', null, String(value)), h('span', null, label));
+  return h('div', { class: 'changes-stats' },
+    stat(changes.length, 'changes'),
+    stat(agents, 'by agents'),
+    stat(changes.length - agents, 'by humans'),
+    stat(touched, 'parts touched'));
+}
+
+function changeItem(change, nodeIndex) {
+  const isAgent = change.authorType === 'agent';
+  return h('li', { class: `change ${isAgent ? 'is-agent' : 'is-human'}` },
+    h('div', { class: 'change-dot', 'aria-hidden': 'true' }, icon(isAgent ? 'robot' : 'user')),
+    h('article', { class: 'card change-card' },
+      h('div', { class: 'change-top' },
+        h('span', null, formatDate(change.date)),
+        change.ref && (change.url
+          ? h('a', { class: 'link', href: change.url, target: '_blank', rel: 'noopener noreferrer' }, change.ref)
+          : h('span', null, change.ref)),
+        h('span', { class: `tag ${isAgent ? 'tag-agent' : 'tag-human'}` }, isAgent ? 'agent' : 'human'),
+        change.author && h('span', null, change.author),
+        change.kind && h('span', { class: 'tag' }, change.kind)),
+      h('h3', null, change.title),
+      change.what && h('p', null, change.what),
+      change.why && h('div', { class: 'change-why' }, h('b', null, 'Why'), change.why),
+      change.risk && h('p', { class: 'change-risk' }, '⚠ ', change.risk),
+      list(change.nodes).length > 0 && h('div', { class: 'change-nodes' }, list(change.nodes).map((id) => {
+        const node = nodeIndex.get(id);
+        return h('span', { class: 'chip' }, node ? node.label : id);
+      })),
+      list(change.files).length > 0 && h('div', { class: 'change-nodes' }, list(change.files).slice(0, 6).map(fileChip))));
+}
+
+function formatDate(value) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return text(value, 'undated');
+  return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
+// ---- lessons.js ----
+// Chapters: key concepts (one idea per card) and check-yourself quiz.
+function renderConcepts(data, mount) {
+  const concepts = list(data.concepts);
+  if (!concepts.length) return;
+  let index = 0;
+  const card = h('article', { class: 'card concept-card', 'aria-live': 'polite' });
+  const controls = h('div', { class: 'carousel-controls' });
+
+  function go(next) {
+    const target = Math.min(Math.max(next, 0), concepts.length - 1);
+    const direction = target >= index ? 1 : -1;
+    index = target;
+    render();
+    slideIn(card, direction);
+  }
+
+  function render() {
+    const concept = concepts[index];
+    fill(card,
+      h('span', { class: 'step-count' }, `Idea ${index + 1} of ${concepts.length}`),
+      h('h3', null, concept.title),
+      h('p', null, concept.body),
+      concept.analogy && h('div', { class: 'callout' }, h('b', null, 'Think of it like'), concept.analogy),
+      concept.file && h('div', { class: 'code-head' }, fileChip(concept.file)),
+      concept.code && codeBlock(concept.code, concept.lang),
+    );
+    fill(controls,
+      h('button', { class: 'btn btn-ghost btn-sm', type: 'button', disabled: index === 0, onclick: () => go(index - 1) }, 'Back'),
+      stepDots(concepts.length, index, go),
+      h('button', { class: 'btn btn-primary', type: 'button', disabled: index === concepts.length - 1, onclick: () => go(index + 1) }, 'Continue'),
+    );
+  }
+
+  render();
+  mount.append(h('div', { class: 'lesson' }, card, controls));
+}
+
+function renderQuiz(data, mount) {
+  const questions = list(data.quiz);
+  if (!questions.length) return;
+  let results = {};
+  const bar = h('div');
+  const label = h('b');
+  const score = h('div', { class: 'score card' }, label, h('div', { class: 'score-bar' }, bar));
+
+  function record(index, correct) {
+    results = { ...results, [index]: correct };
+    const right = Object.values(results).filter(Boolean).length;
+    const answered = Object.keys(results).length;
+    label.textContent = `${right} / ${questions.length} correct`;
+    bar.style.width = `${(right / questions.length) * 100}%`;
+    if (answered === questions.length) label.textContent += right === questions.length ? ' · Perfect!' : ' · Nice work';
+  }
+
+  label.textContent = `0 / ${questions.length} correct`;
+  bar.style.width = '0%';
+  mount.append(h('div', { class: 'lesson quiz' }, questions.map((q, i) => questionCard(q, i, record)), score));
+}
+
+function questionCard(question, index, record) {
+  const options = list(question.options);
+  let picked = null;
+  const optionEls = options.map((option, i) => h('button', {
+    class: 'option', type: 'button', role: 'radio', 'aria-checked': 'false',
+    onclick: () => pick(i),
+  }, h('span', { class: 'key' }, String(i + 1)), option));
+  const check = h('button', { class: 'btn btn-primary', type: 'button', disabled: true, onclick: grade }, 'Check');
+  const feedback = h('div', { 'aria-live': 'polite' });
+
+  function pick(i) {
+    picked = i;
+    optionEls.forEach((el, j) => el.setAttribute('aria-checked', String(j === i)));
+    check.disabled = false;
+  }
+
+  function grade() {
+    const correct = picked === question.answer;
+    optionEls.forEach((el, j) => {
+      el.disabled = true;
+      el.classList.toggle('is-correct', j === question.answer);
+      el.classList.toggle('is-wrong', j === picked && !correct);
+    });
+    check.remove();
+    const pickedEl = optionEls[picked];
+    if (correct) pop(pickedEl); else shake(pickedEl);
+    fill(feedback, h('div', { class: `feedback ${correct ? 'is-correct' : 'is-wrong'}` },
+      h('b', null, correct ? 'Correct!' : 'Not quite'),
+      text(question.explain, correct ? 'You got it.' : `The answer is “${options[question.answer]}”.`)));
+    riseIn(feedback.firstElementChild);
+    record(index, correct);
+  }
+
+  return h('article', { class: 'card question' },
+    h('span', { class: 'step-count' }, `Question ${index + 1}`),
+    h('h3', null, question.question),
+    h('div', { class: 'options', role: 'radiogroup', 'aria-label': question.question }, optionEls),
+    feedback,
+    h('div', { class: 'question-actions' }, check));
+}
+
+// ---- sections.js ----
+// Static chapters: hero, where-things-live tree, glossary, runbook.
+
+// Rough reading time, Brilliant-style: a cue for how long the tour takes.
+function tourMinutes(data) {
+  const steps = list(data.flows).reduce((n, f) => n + list(f.steps).length, 0);
+  const minutes = 2 + steps * 0.35 + list(data.concepts).length * 0.6 + list(data.quiz).length * 0.5 + list(data.changes).length * 0.3;
+  return Math.max(3, Math.round(minutes));
+}
+
+function renderHero(data, chapters) {
+  const meta = data.meta || {};
+  const firstChapter = chapters[0];
+  const flowChapter = chapters.find((c) => c.key === 'flows');
+  const glance = [
+    [list(data.nodes).length, 'parts'],
+    [list(data.flows).length, list(data.flows).length === 1 ? 'flow' : 'flows'],
+    [list(data.changes).length, 'changes'],
+    [chapters.length, 'chapters'],
+  ];
+  return h('section', { class: 'hero', 'aria-labelledby': 'hero-title' },
+    h('div', { class: 'hero-copy' },
+      h('div', { class: 'hero-eyebrow' },
+        h('span', null, text(meta.repo, 'Repository')),
+        h('span', { class: 'hero-dot', 'aria-hidden': 'true' }),
+        h('span', null, `${tourMinutes(data)} min guided tour`)),
+      h('h1', { id: 'hero-title' }, meta.title),
+      h('p', { class: 'hero-summary' }, meta.summary),
+      h('div', { class: 'btn-row hero-actions' },
+        firstChapter && h('a', { class: 'btn btn-primary', href: `#ch-${firstChapter.key}` }, 'Start the tour'),
+        flowChapter && h('a', { class: 'btn btn-ghost', href: `#ch-${flowChapter.key}` }, 'Jump to a flow')),
+      h('dl', { class: 'hero-glance' }, glance.map(([value, label]) => h('div', null, h('dt', null, label), h('dd', null, String(value))))),
+      list(meta.stack).length > 0 && h('div', { class: 'hero-stack' },
+        h('span', { class: 'hero-stack-label' }, 'Built with'),
+        list(meta.stack).map((item) => h('span', { class: 'chip' }, item)))),
+    h('div', { class: 'hero-art' }, heroArt(data)));
+}
+
+// The repo's own first flow, drawn as a tidy loop of four stops inside the
+// brand blob, with one dot travelling the route. Falls back to the first nodes.
+const HERO_SPOTS = [{ x: 64, y: 70 }, { x: 266, y: 70 }, { x: 266, y: 246 }, { x: 64, y: 246 }];
+const HERO_BOX = { w: 130, h: 104 };
+
+function heroArt(data) {
+  const nodeIndex = byId(data.nodes);
+  const flow = list(data.flows)[0];
+  const ids = flow ? flowActors(list(flow.steps)) : list(data.nodes).map((n) => n.id);
+  const actors = ids.slice(0, 4).map((id) => nodeIndex.get(id)).filter(Boolean);
+  const center = (i) => ({ x: HERO_SPOTS[i].x + HERO_BOX.w / 2, y: HERO_SPOTS[i].y + HERO_BOX.h / 2 });
+  const route = actors.map((_, i) => `${i ? 'L' : 'M'}${center(i).x},${center(i).y}`).join(' ');
+  const svg = s('svg', { viewBox: '0 0 460 420', role: 'img', 'aria-label': flow ? `${flow.title}: ${actors.map((a) => a.label).join(', then ')}` : 'Main parts of the system' });
+  svg.append(
+    s('circle', { cx: 230, cy: 218, r: 196, fill: '#d7ffb8' }),
+    s('circle', { cx: 404, cy: 52, r: 30, fill: '#ffc800' }),
+    s('circle', { cx: 42, cy: 372, r: 14, fill: '#1cb0f6' }),
+  );
+  if (actors.length > 1) {
+    svg.append(s('path', { d: route, fill: 'none', stroke: '#ffffff', 'stroke-width': 14, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }),
+      s('path', { d: route, fill: 'none', stroke: '#1cb0f6', 'stroke-width': 4, 'stroke-dasharray': '1 11', 'stroke-linecap': 'round' }));
+  }
+  actors.forEach((node, i) => svg.append(heroStop(node, i)));
+  if (actors.length > 1 && !reducedMotion()) {
+    svg.append(s('circle', { r: 10, fill: '#58cc02', stroke: '#ffffff', 'stroke-width': 4 },
+      s('animateMotion', { dur: `${actors.length * 1.4}s`, repeatCount: 'indefinite', path: route, calcMode: 'linear' })));
+  }
+  if (flow) {
+    svg.append(s('text', { class: 'hero-art-caption', x: 230, y: 404, 'text-anchor': 'middle' }, truncate(`▶ ${flow.title}`, 40)));
+  }
+  return svg;
+}
+
+function heroStop(node, index) {
+  const { x, y } = HERO_SPOTS[index];
+  const label = truncate(node.label, 16);
+  return s('g', null,
+    s('rect', { x, y: y + 6, width: HERO_BOX.w, height: HERO_BOX.h, rx: 18, fill: '#e5e5e5' }),
+    s('rect', { x, y, width: HERO_BOX.w, height: HERO_BOX.h, rx: 18, fill: '#ffffff', stroke: '#e5e5e5', 'stroke-width': 3 }),
+    s('circle', { cx: x + 18, cy: y + 18, r: 11, fill: '#58cc02' }),
+    s('text', { class: 'hero-art-num', x: x + 18, y: y + 22, 'text-anchor': 'middle' }, String(index + 1)),
+    icon(node.kind, { x: x + HERO_BOX.w / 2 - 22, y: y + 14, width: 44, height: 44 }),
+    s('text', { class: 'hero-art-label', x: x + HERO_BOX.w / 2, y: y + 84, 'text-anchor': 'middle' }, label, s('title', null, node.label)));
+}
+
+function renderTree(data, mount) {
+  const entries = list(data.tree);
+  mount.append(h('div', { class: 'card', style: 'padding:0' }, h('ul', { class: 'tree' }, entries.map((entry) => {
+    const depth = String(entry.path).replace(/\/$/, '').split('/').length - 1;
+    const isDir = String(entry.path).endsWith('/');
+    return h('li', { class: entry.key ? 'is-key' : '' },
+      h('span', { class: 'path', style: `padding-left:${depth * 18}px` }, icon(isDir ? 'folder' : 'file'), entry.path),
+      h('span', { class: 'note' }, text(entry.note)));
+  }))));
+}
+
+function renderGlossary(data, mount) {
+  const terms = list(data.glossary);
+  const input = h('input', { class: 'search', type: 'search', placeholder: 'Search terms…', 'aria-label': 'Search glossary' });
+  const items = terms.map((term) => ({ term, el: h('div', null, h('dt', null, term.term), h('dd', null, term.definition)) }));
+  input.addEventListener('input', () => {
+    const q = input.value.trim().toLowerCase();
+    items.forEach(({ term, el }) => {
+      el.hidden = Boolean(q) && !`${term.term} ${term.definition}`.toLowerCase().includes(q);
+    });
+  });
+  mount.append(h('div', { class: 'lesson' }, input, h('dl', { class: 'glossary' }, items.map((item) => item.el))));
+}
+
+function renderRunbook(data, mount) {
+  mount.append(h('div', { class: 'lesson runbook' }, list(data.runbook).map((item) => {
+    const copy = h('button', { class: 'btn btn-ghost btn-sm', type: 'button' }, 'Copy');
+    copy.addEventListener('click', () => {
+      navigator.clipboard.writeText(item.command)
+        .then(() => { copy.textContent = 'Copied'; })
+        .catch(() => { copy.textContent = 'Select & copy'; });
+    });
+    return h('article', { class: 'card' },
+      h('div', { class: 'code-head', style: 'margin-top:0' }, h('h3', null, item.label), item.command && copy),
+      item.note && h('p', null, item.note),
+      item.command && codeBlock(item.command, 'sh'));
+  })));
+}
+
+// ---- app.js ----
+// Boot: read the embedded data, decide which chapters exist, render the page.
+const DESIGN_CREDIT = 'Visual design language inspired by Duolingo; lesson format inspired by Brilliant. Not affiliated with either.';
+const CHAPTERS = [
+  { key: 'map', title: 'The big picture', lead: 'Every box is one part of the system. Tap one to see what it does and who it talks to.', has: (d) => list(d.nodes).length > 0, render: renderMap },
+  { key: 'flows', title: 'Follow it end to end', lead: 'Pick a flow and press Continue. Each step is one hop, with the exact file that does the work.', has: (d) => list(d.flows).length > 0, render: renderFlows },
+  { key: 'changes', title: 'What changed, and why', lead: 'Recent merges from people and agents, each with its reason. Use “Show on map” to see which parts moved.', has: (d) => list(d.changes).length > 0, render: renderChanges },
+  { key: 'tree', title: 'Where things live', lead: 'The folders worth knowing. Starred ones are where most changes happen.', has: (d) => list(d.tree).length > 0, render: renderTree },
+  { key: 'data', title: 'The data', lead: 'What the system stores and how the pieces relate.', has: (d) => list(d.dataModel).length > 0, render: renderModels },
+  { key: 'concepts', title: 'Key ideas', lead: 'The few patterns you need to read this code with confidence. One idea at a time.', has: (d) => list(d.concepts).length > 0, render: renderConcepts },
+  { key: 'quiz', title: 'Check yourself', lead: 'A few quick questions. If you can answer these, you can find your way around.', has: (d) => list(d.quiz).length > 0, render: renderQuiz },
+  { key: 'glossary', title: 'Glossary', lead: 'Words this codebase uses in its own way.', has: (d) => list(d.glossary).length > 0, render: renderGlossary },
+  { key: 'run', title: 'Run it yourself', lead: 'Commands to get it running on your machine.', has: (d) => list(d.runbook).length > 0, render: renderRunbook },
+];
+
+function chooseChapters(data) {
+  const requested = list(data.meta && data.meta.chapters);
+  const order = requested.length ? requested : CHAPTERS.map((c) => c.key);
+  return order
+    .map((key) => CHAPTERS.find((c) => c.key === key))
+    .filter((chapter) => chapter && chapter.has(data));
+}
+
+function chapterSection(chapter, index, chapters, data) {
+  const intro = (data.intros || {})[chapter.key];
+  const body = h('div', { class: 'chapter-body' });
+  const next = chapters[index + 1];
+  const section = h('section', { class: 'chapter', id: `ch-${chapter.key}`, 'aria-labelledby': `ch-${chapter.key}-title` },
+    h('header', { class: 'chapter-head' },
+      h('div', { class: 'chapter-eyebrow' }, h('span', { class: 'num' }, String(index + 1)), `Chapter ${index + 1} of ${chapters.length}`),
+      h('h2', { id: `ch-${chapter.key}-title` }, text(intro && intro.title, chapter.title)),
+      h('p', { class: 'chapter-lead' }, text(intro && intro.lead, chapter.lead))),
+    body,
+    next && h('div', { class: 'chapter-next' }, h('a', { class: 'btn btn-primary', href: `#ch-${next.key}` }, `Continue: ${next.title}`)));
+  try {
+    chapter.render(data, body);
+  } catch (error) {
+    body.append(h('p', { class: 'empty' }, `This chapter could not be drawn: ${error.message}`));
+  }
+  return section;
+}
+
+function siteHeader(chapters) {
+  const progressFill = h('div', { class: 'lesson-progress-fill' });
+  const pills = chapters.map((chapter, i) => h('a', { class: 'chapter-pill', href: `#ch-${chapter.key}`, 'data-key': chapter.key },
+    h('span', { class: 'num' }, String(i + 1)), chapter.title));
+  const header = h('header', { class: 'site-header' },
+    h('div', { class: 'site-header-inner' },
+      h('a', { class: 'brand', href: '#main' }, brandMark(), h('span', { class: 'brand-text' }, 'Repo Explainer')),
+      h('div', { class: 'lesson-progress', role: 'progressbar', 'aria-label': 'Tour progress', 'aria-valuemin': '0', 'aria-valuemax': '100' }, progressFill)),
+    h('nav', { class: 'chapter-nav', 'aria-label': 'Chapters' }, pills));
+  return { header, progressFill, pills };
+}
+
+function trackProgress(progressFill, pills) {
+  const bar = progressFill.parentElement;
+  const update = () => {
+    const max = document.documentElement.scrollHeight - window.innerHeight;
+    const pct = max > 0 ? Math.min(100, Math.round((window.scrollY / max) * 100)) : 100;
+    progressFill.style.width = `${pct}%`;
+    bar.setAttribute('aria-valuenow', String(pct));
+  };
+  window.addEventListener('scroll', update, { passive: true });
+  update();
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.filter((e) => e.isIntersecting).forEach((entry) => {
+      const key = entry.target.id.replace('ch-', '');
+      const activeIndex = pills.findIndex((p) => p.dataset.key === key);
+      pills.forEach((pill, i) => {
+        pill.classList.toggle('is-active', i === activeIndex);
+        pill.classList.toggle('is-done', i < activeIndex);
+      });
+      // Scroll only the nav strip sideways; scrollIntoView would also nudge
+      // the page and cancel the reader's scroll momentum.
+      const pill = pills[activeIndex];
+      if (pill) {
+        const nav = pill.parentElement;
+        nav.scrollTo({ left: pill.offsetLeft - nav.clientWidth / 2 + pill.offsetWidth / 2, behavior: 'smooth' });
+      }
+    });
+  }, { rootMargin: '-45% 0px -50% 0px' });
+  document.querySelectorAll('.chapter').forEach((el) => observer.observe(el));
+}
+
+function fatal(app, message) {
+  fill(app, h('div', { class: 'fatal', role: 'alert' }, h('h1', null, 'This explainer could not load'), h('p', null, message)));
+}
+
+function boot() {
+  const app = document.getElementById('app');
+  let data;
+  try {
+    data = JSON.parse(document.getElementById('explainer-data').textContent);
+  } catch (error) {
+    fatal(app, `The embedded data is not valid JSON (${error.message}). Rebuild with scripts/build.mjs.`);
+    return;
+  }
+  if (!data || !data.meta || !data.meta.title) {
+    fatal(app, 'The embedded data has no meta.title. Run scripts/validate.mjs to see what is missing.');
+    return;
+  }
+  const chapters = chooseChapters(data);
+  const { header, progressFill, pills } = siteHeader(chapters);
+  const main = h('main', { id: 'main', tabindex: '-1' },
+    h('div', { class: 'wrap' }, renderHero(data, chapters), chapters.map((c, i) => chapterSection(c, i, chapters, data))));
+  const meta = data.meta;
+  const footer = h('footer', { class: 'site-footer' },
+    h('p', null, `Generated ${meta.generatedAt ? `on ${formatDate(meta.generatedAt)} ` : ''}${meta.commit ? `at ${String(meta.commit).slice(0, 7)} ` : ''}with repo-explainer.`),
+    h('p', null, DESIGN_CREDIT));
+  fill(app, header, main, footer);
+  app.removeAttribute('aria-busy');
+  trackProgress(progressFill, pills);
+  revealOnScroll();
+}
+
+// Chapters rise in once as they enter the viewport. Content is never hidden
+// unless the observer exists and motion is allowed.
+function revealOnScroll() {
+  if (reducedMotion() || !('IntersectionObserver' in window)) return;
+  const targets = [...document.querySelectorAll('.chapter-head')];
+  const observer = new IntersectionObserver((entries) => {
+    entries.filter((e) => e.isIntersecting).forEach((entry) => {
+      entry.target.classList.add('is-visible');
+      observer.unobserve(entry.target);
+    });
+  }, { rootMargin: '0px 0px -4% 0px' });
+  targets.forEach((el) => {
+    el.classList.add('reveal');
+    observer.observe(el);
+  });
+}
+
+
+boot();
+})();
+</script>
+</body>
+</html>
