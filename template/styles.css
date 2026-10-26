@@ -66,6 +66,8 @@ body {
   line-height: 1.47;
   letter-spacing: var(--tracking);
   -webkit-font-smoothing: antialiased;
+  /* Long identifiers, paths and URLs wrap instead of stretching their box. */
+  overflow-wrap: break-word;
 }
 h1, h2, h3, h4 { margin: 0; color: var(--color-eel-dark-blue); text-wrap: balance; }
 p { margin: 0; text-wrap: pretty; }
@@ -284,9 +286,10 @@ kbd { font-family: var(--font-mono); font-size: 11px; padding: 1px 6px; border: 
 
 /* ---------- Tree ---------- */
 .tree { list-style: none; margin: 0; padding: 8px 0; }
-.tree li { display: grid; grid-template-columns: minmax(0, auto) minmax(0, 1fr); gap: 16px; align-items: baseline; padding: 10px 16px; border-bottom: var(--border) solid var(--color-polar); }
+.tree li { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); gap: 16px; align-items: baseline; padding: 10px 16px; border-bottom: var(--border) solid var(--color-polar); }
 .tree li:last-child { border-bottom: 0; }
-.tree .path { display: inline-flex; align-items: center; gap: 8px; font-family: var(--font-mono); font-size: 13px; color: var(--color-eel-dark-blue); white-space: nowrap; }
+.tree .path { display: flex; align-items: flex-start; gap: 8px; min-width: 0; font-family: var(--font-mono); font-size: 13px; color: var(--color-eel-dark-blue); }
+.tree .path-text { min-width: 0; overflow-wrap: anywhere; }
 .tree .path svg { width: 18px; height: 18px; flex: none; }
 .tree .note { color: var(--color-charcoal); font-size: 14px; }
 .tree li.is-key .path { font-weight: 700; }
@@ -378,28 +381,42 @@ kbd { font-family: var(--font-mono); font-size: 11px; padding: 1px 6px; border: 
 .seq-step .arrow, .seq-step .badge-bg, .seq-step .label { transition: stroke 200ms ease, fill 200ms ease; }
 .step-dots button { transition: width 200ms cubic-bezier(0.2, 0.8, 0.2, 1), background 200ms ease; }
 
+/* ---------- Long words ----------
+   Flex and grid items refuse to shrink below their longest word, so text
+   holders in rows must opt in to breaking anywhere and to a 100% cap. */
+.chip, .tag, .link, .option, .hero-eyebrow > span, .change-top > *, .step-top > *, .step-route > *,
+.rel li > *, .er-name > *, .entity-name, .node-label, .glossary dt, .glossary dd, .key-badge + * {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  min-width: 0;
+}
+.chip-file { overflow-wrap: normal; }
+/* Flex headings: the title text is an anonymous flex item, so let it break. */
+.er-detail-head h3, .model-head h3, .code-head > *, .entity-head > *, .step-route { min-width: 0; overflow-wrap: anywhere; }
+.link { text-align: left; }
+
 /* ---------- Responsive ---------- */
 @media (max-width: 960px) {
-  .hero { grid-template-columns: 1fr; padding-top: 32px; gap: 16px; min-height: 0; max-height: none; }
+  .hero { grid-template-columns: minmax(0, 1fr); padding-top: 32px; gap: 16px; min-height: 0; max-height: none; }
   .hero-art { order: -1; max-width: 380px; width: 100%; margin: 0 auto; }
   .flow-layout { grid-template-columns: minmax(0, 1fr); }
   .flow-layout > .step-card { position: static; max-height: none; }
   .seq-heads-wrap { top: 118px; }
-  .map-detail { grid-template-columns: 1fr; }
+  .map-detail { grid-template-columns: minmax(0, 1fr); }
 }
 @media (max-width: 720px) {
   :root { --section-gap: 72px; }
   .map-canvas { min-width: 0; }
-  .map-grid { grid-template-columns: 1fr; gap: 28px; }
+  .map-grid { grid-template-columns: minmax(0, 1fr); gap: 28px; }
   .changes-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .hero-glance { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .hero-glance div:nth-child(3) { border-left: 0; }
   .hero-glance div:nth-child(n+3) { border-top: var(--border) solid var(--color-swan); }
-  .tree li { grid-template-columns: 1fr; gap: 4px; }
+  .tree li { grid-template-columns: minmax(0, 1fr); gap: 4px; }
   .er-canvas { min-width: 0; }
-  .er-grid { grid-template-columns: 1fr; row-gap: 32px; }
+  .er-grid { grid-template-columns: minmax(0, 1fr); row-gap: 32px; }
   .entity { grid-column: 1 / -1 !important; grid-row: auto !important; width: 100%; }
-  .er-row { grid-template-columns: 1fr auto; }
+  .er-row { grid-template-columns: minmax(0, 1fr) auto; }
   .er-note { grid-column: 1 / -1; }
   .er-row-head .er-note, .er-row-head span:last-child { display: none; }
   .brand-text { display: none; }

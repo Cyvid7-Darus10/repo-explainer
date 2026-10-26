@@ -1,0 +1,705 @@
+{
+  "$schema": "../references/data-schema.md",
+  "meta": {
+    "title": "AbstractSingletonProxyFactoryBeanConfigurationManagerImplementation, explained",
+    "repo": "acme-corporation/abstractsingletonproxyfactorybeanconfigurationmanagerimplementation",
+    "summary": "Handles AbstractSingletonProxyFactoryBeanConfigurationManagerImplementation when the AbstractSingletonProxyFactoryBeanConfigurationManagerImplementationFactory is ready. A team to-do app. A Next.js web app talks to a small API, which stores tasks in Postgres and hands slow work (emails, webhooks) to a background worker.",
+    "stack": [
+      "Next.js 15",
+      "TypeScript",
+      "Postgres",
+      "Prisma",
+      "BullMQ",
+      "Redis",
+      "Stripe",
+      "AbstractSingletonProxyFactoryBeanConfigurationManagerImplementation",
+      "@scope/abstractsingletonproxyfactorybeanconfigurationmanagerimplementation"
+    ],
+    "preset": "fullstack-web",
+    "generatedAt": "2026-10-25",
+    "commit": "9f3c2ab41e"
+  },
+  "layers": [
+    {
+      "id": "client",
+      "label": "AbstractSingletonProxyFactoryBeanConfigurationManagerImplementation",
+      "color": "blue"
+    },
+    {
+      "id": "edge",
+      "label": "Edge & API",
+      "color": "green"
+    },
+    {
+      "id": "domain",
+      "label": "Domain",
+      "color": "navy"
+    },
+    {
+      "id": "infra",
+      "label": "Data & infra",
+      "color": "yellow"
+    },
+    {
+      "id": "external",
+      "label": "Outside world",
+      "color": "pink"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "user",
+      "label": "Team member",
+      "layer": "client",
+      "kind": "user",
+      "summary": "Someone using Taskflow in their browser.",
+      "files": [
+        "packages/platform-services/src/modules/authentication/providers/oauth2/handlers/refreshTokenRotationHandler.ts"
+      ],
+      "tech": " AbstractSingletonProxyFactoryBeanConfigurationManagerImplementation"
+    },
+    {
+      "id": "web",
+      "label": "Web appAbstractSingletonProxyFactoryB",
+      "layer": "client",
+      "kind": "ui",
+      "tech": "Next.js App Router AbstractSingletonProxyFactoryBeanConfigurationManagerImplementation",
+      "summary": "Pages and React components. Server components fetch data; client components handle forms and optimistic updates.",
+      "files": [
+        "apps/web/app/",
+        "apps/web/components/",
+        "packages/platform-services/src/modules/authentication/providers/oauth2/handlers/refreshTokenRotationHandler.ts"
+      ]
+    },
+    {
+      "id": "middleware",
+      "label": "Auth middleware",
+      "layer": "edge",
+      "kind": "auth",
+      "tech": "Next middleware + JWT AbstractSingletonProxyFactoryBeanConfigurationManagerImplementation",
+      "summary": "Runs before every request. Reads the session cookie, rejects anonymous users, and puts the user id on the request.",
+      "files": [
+        "apps/web/middleware.ts",
+        "packages/platform-services/src/modules/authentication/providers/oauth2/handlers/refreshTokenRotationHandler.ts"
+      ]
+    },
+    {
+      "id": "api",
+      "label": "AbstractSingletonProxyFactoryBeanConfigurationManagerImplementation",
+      "layer": "edge",
+      "kind": "api",
+      "tech": "Route handlers AbstractSingletonProxyFactoryBeanConfigurationManagerImplementation",
+      "summary": "Thin HTTP layer. Parses and validates input with Zod, then calls the task service. Never touches the database directly.",
+      "files": [
+        "apps/web/app/api/tasks/route.ts",
+        "packages/platform-services/src/modules/authentication/providers/oauth2/handlers/refreshTokenRotationHandler.ts"
+      ]
+    },
+    {
+      "id": "service",
+      "label": "Task serviceAbstractSingletonProxyFactoryB",
+      "layer": "domain",
+      "kind": "service",
+      "tech": "Plain TypeScript AbstractSingletonProxyFactoryBeanConfigurationManagerImplementation",
+      "summary": "All business rules live here: who can edit a task, what happens when it is completed, which events fire.",
+      "files": [
+        "packages/core/src/tasks/service.ts",
+        "packages/platform-services/src/modules/authentication/providers/oauth2/handlers/refreshTokenRotationHandler.ts"
+      ]
+    },
+    {
+      "id": "billing",
+      "label": "Billing service",
+      "layer": "domain",
+      "kind": "service",
+      "tech": "Stripe SDK AbstractSingletonProxyFactoryBeanConfigurationManagerImplementation",
+      "summary": "Checks plan limits (free teams get 50 open tasks) and syncs subscription state from Stripe webhooks.",
+      "files": [
+        "packages/core/src/billing/",
+        "packages/platform-services/src/modules/authentication/providers/oauth2/handlers/refreshTokenRotationHandler.ts"
+      ]
+    },
+    {
+      "id": "db",
+      "label": "Postgres",
+      "layer": "infra",
+      "kind": "db",
+      "tech": "Prisma ORM AbstractSingletonProxyFactoryBeanConfigurationManagerImplementation",
+      "summary": "The source of truth for teams, users and tasks.",
+      "files": [
+        "packages/db/prisma/schema.prisma",
+        "packages/platform-services/src/modules/authentication/providers/oauth2/handlers/refreshTokenRotationHandler.ts"
+      ]
+    },
+    {
+      "id": "queue",
+      "label": "Job queue",
+      "layer": "infra",
+      "kind": "queue",
+      "tech": "BullMQ on Redis AbstractSingletonProxyFactoryBeanConfigurationManagerImplementation",
+      "summary": "Holds slow work so requests stay fast. Each job is retried 5 times with backoff.",
+      "files": [
+        "packages/core/src/queue.ts",
+        "packages/platform-services/src/modules/authentication/providers/oauth2/handlers/refreshTokenRotationHandler.ts"
+      ]
+    },
+    {
+      "id": "worker",
+      "label": "Worker",
+      "layer": "infra",
+      "kind": "job",
+      "tech": "Node process AbstractSingletonProxyFactoryBeanConfigurationManagerImplementation",
+      "summary": "Pulls jobs off the queue: sends emails, fires customer webhooks, rolls up daily stats.",
+      "files": [
+        "apps/worker/src/index.ts",
+        "packages/platform-services/src/modules/authentication/providers/oauth2/handlers/refreshTokenRotationHandler.ts"
+      ]
+    },
+    {
+      "id": "email",
+      "label": "Email provider",
+      "layer": "external",
+      "kind": "external",
+      "tech": "Resend AbstractSingletonProxyFactoryBeanConfigurationManagerImplementation",
+      "summary": "Delivers notification emails.",
+      "files": [
+        "apps/worker/src/jobs/send-email.ts",
+        "packages/platform-services/src/modules/authentication/providers/oauth2/handlers/refreshTokenRotationHandler.ts"
+      ]
+    },
+    {
+      "id": "stripe",
+      "label": "Stripe",
+      "layer": "external",
+      "kind": "external",
+      "summary": "Payments and subscriptions.",
+      "files": [
+        "apps/web/app/api/stripe/webhook/route.ts",
+        "packages/platform-services/src/modules/authentication/providers/oauth2/handlers/refreshTokenRotationHandler.ts"
+      ],
+      "tech": " AbstractSingletonProxyFactoryBeanConfigurationManagerImplementation"
+    }
+  ],
+  "edges": [
+    {
+      "from": "user",
+      "to": "web",
+      "label": "AbstractSingletonProxyFactoryBeanConfigurationManagerImplementation"
+    },
+    {
+      "from": "web",
+      "to": "middleware",
+      "label": "fetch /api/*"
+    },
+    {
+      "from": "middleware",
+      "to": "api",
+      "label": "user id"
+    },
+    {
+      "from": "api",
+      "to": "service",
+      "label": "createTask()"
+    },
+    {
+      "from": "service",
+      "to": "billing",
+      "label": "checkLimit()"
+    },
+    {
+      "from": "service",
+      "to": "db",
+      "label": "insert",
+      "kind": "data"
+    },
+    {
+      "from": "service",
+      "to": "queue",
+      "label": "enqueue",
+      "kind": "async"
+    },
+    {
+      "from": "queue",
+      "to": "worker",
+      "label": "job",
+      "kind": "async"
+    },
+    {
+      "from": "worker",
+      "to": "email",
+      "label": "send"
+    },
+    {
+      "from": "stripe",
+      "to": "billing",
+      "label": "webhook",
+      "kind": "async"
+    }
+  ],
+  "flows": [
+    {
+      "id": "create-task",
+      "title": "AbstractSingletonProxyFactoryBeanConfigurationManagerImplementation flow",
+      "trigger": "Handles AbstractSingletonProxyFactoryBeanConfigurationManagerImplementation when the AbstractSingletonProxyFactoryBeanConfigurationManagerImplementationFactory is ready.",
+      "summary": "The most common write in the app. Follow it from the click to the email the assignee receives.",
+      "steps": [
+        {
+          "from": "user",
+          "to": "web",
+          "label": "Types a title, presses Add AbstractSingletonProxyFactoryBeanConfigurationManagerImplementation",
+          "kind": "request",
+          "detail": "Handles AbstractSingletonProxyFactoryBeanConfigurationManagerImplementation when the AbstractSingletonProxyFactoryBeanConfigurationManagerImplementationFactory is ready.",
+          "file": "packages/platform-services/src/modules/authentication/providers/oauth2/handlers/refreshTokenRotationHandler.ts:123"
+        },
+        {
+          "from": "web",
+          "to": "api",
+          "label": "POST /api/tasks AbstractSingletonProxyFactoryBeanConfigurationManagerImplementation",
+          "kind": "request",
+          "detail": "Handles AbstractSingletonProxyFactoryBeanConfigurationManagerImplementation when the AbstractSingletonProxyFactoryBeanConfigurationManagerImplementationFactory is ready.",
+          "file": "packages/platform-services/src/modules/authentication/providers/oauth2/handlers/refreshTokenRotationHandler.ts:123",
+          "code": "await fetch('/api/tasks', {\n  method: 'POST',\n  body: JSON.stringify({ title, assigneeId }),\n})",
+          "lang": "ts",
+          "why": "Doing auth once in middleware means no route can forget to check it."
+        },
+        {
+          "from": "api",
+          "to": "service",
+          "label": "Validates, calls createTask() AbstractSingletonProxyFactoryBeanConfigurationManagerImplementation",
+          "kind": "request",
+          "detail": "Handles AbstractSingletonProxyFactoryBeanConfigurationManagerImplementation when the AbstractSingletonProxyFactoryBeanConfigurationManagerImplementationFactory is ready.",
+          "file": "packages/platform-services/src/modules/authentication/providers/oauth2/handlers/refreshTokenRotationHandler.ts:123",
+          "code": "const input = CreateTask.parse(await req.json())\nconst task = await tasks.createTask(userId, input)\nreturn Response.json(task, { status: 201 })",
+          "lang": "ts",
+          "why": "Handles AbstractSingletonProxyFactoryBeanConfigurationManagerImplementation when the AbstractSingletonProxyFactoryBeanConfigurationManagerImplementationFactory is ready."
+        },
+        {
+          "from": "service",
+          "to": "service",
+          "label": "Checks the plan limit AbstractSingletonProxyFactoryBeanConfigurationManagerImplementation",
+          "kind": "internal",
+          "detail": "Handles AbstractSingletonProxyFactoryBeanConfigurationManagerImplementation when the AbstractSingletonProxyFactoryBeanConfigurationManagerImplementationFactory is ready.",
+          "file": "packages/platform-services/src/modules/authentication/providers/oauth2/handlers/refreshTokenRotationHandler.ts:123",
+          "code": "const result = await AbstractSingletonProxyFactoryBeanConfigurationManagerImplementation.getInstance().resolveDependency(AbstractSingletonProxyFactoryBeanConfigurationManagerImplementationToken, { strict: true, fallback: null })"
+        },
+        {
+          "from": "service",
+          "to": "db",
+          "label": "INSERT the task AbstractSingletonProxyFactoryBeanConfigurationManagerImplementation",
+          "kind": "data",
+          "detail": "Handles AbstractSingletonProxyFactoryBeanConfigurationManagerImplementation when the AbstractSingletonProxyFactoryBeanConfigurationManagerImplementationFactory is ready.",
+          "file": "packages/platform-services/src/modules/authentication/providers/oauth2/handlers/refreshTokenRotationHandler.ts:123"
+        },
+        {
+          "from": "service",
+          "to": "queue",
+          "label": "Enqueue \u201ctask.assigned\u201d AbstractSingletonProxyFactoryBeanConfigurationManagerImplementation",
+          "kind": "async",
+          "detail": "Handles AbstractSingletonProxyFactoryBeanConfigurationManagerImplementation when the AbstractSingletonProxyFactoryBeanConfigurationManagerImplementationFactory is ready.",
+          "why": "Email providers can take seconds. Queuing keeps the click under 100 ms.",
+          "file": "packages/platform-services/src/modules/authentication/providers/oauth2/handlers/refreshTokenRotationHandler.ts:123"
+        },
+        {
+          "from": "api",
+          "to": "web",
+          "label": "201 Created AbstractSingletonProxyFactoryBeanConfigurationManagerImplementation",
+          "kind": "response",
+          "detail": "Handles AbstractSingletonProxyFactoryBeanConfigurationManagerImplementation when the AbstractSingletonProxyFactoryBeanConfigurationManagerImplementationFactory is ready.",
+          "file": "packages/platform-services/src/modules/authentication/providers/oauth2/handlers/refreshTokenRotationHandler.ts:123"
+        },
+        {
+          "from": "queue",
+          "to": "worker",
+          "label": "Worker sends the email AbstractSingletonProxyFactoryBeanConfigurationManagerImplementation",
+          "kind": "async",
+          "detail": "Handles AbstractSingletonProxyFactoryBeanConfigurationManagerImplementation when the AbstractSingletonProxyFactoryBeanConfigurationManagerImplementationFactory is ready.",
+          "file": "packages/platform-services/src/modules/authentication/providers/oauth2/handlers/refreshTokenRotationHandler.ts:123"
+        }
+      ]
+    },
+    {
+      "id": "upgrade",
+      "title": "Upgrade to Pro",
+      "trigger": "Stripe sends a webhook",
+      "summary": "Payment happens on Stripe\u2019s page. We only learn about it through a webhook.",
+      "steps": [
+        {
+          "from": "stripe",
+          "to": "billing",
+          "label": "checkout.session.completed",
+          "kind": "async",
+          "detail": "The webhook route checks the Stripe signature first, then hands the event to the billing service.",
+          "why": "Without the signature check, anyone could POST a fake \u2018paid\u2019 event.",
+          "file": "apps/web/app/api/stripe/webhook/route.ts:10"
+        },
+        {
+          "from": "billing",
+          "to": "db",
+          "label": "Set team.plan = 'pro'",
+          "kind": "data",
+          "detail": "Idempotent: replaying the same event changes nothing.",
+          "file": "packages/core/src/billing/sync.ts:22"
+        },
+        {
+          "from": "billing",
+          "to": "queue",
+          "label": "Enqueue welcome email",
+          "kind": "async",
+          "file": "packages/core/src/billing/sync.ts:30"
+        },
+        {
+          "from": "queue",
+          "to": "worker",
+          "label": "Job runs",
+          "kind": "async",
+          "file": "apps/worker/src/index.ts:15"
+        },
+        {
+          "from": "worker",
+          "to": "email",
+          "label": "\u201cWelcome to Pro\u201d",
+          "kind": "request",
+          "file": "apps/worker/src/jobs/send-email.ts:8"
+        }
+      ]
+    }
+  ],
+  "changes": [
+    {
+      "id": "pr-482",
+      "title": "Handles AbstractSingletonProxyFactoryBeanConfigurationManagerImplementation when the AbstractSingletonProxyFactoryBeanConfigurationManagerImplementationFactory is ready.",
+      "date": "2026-10-24",
+      "author": "abstractsingletonproxyfactorybeanconfigurationmanagerimplementation",
+      "authorType": "agent",
+      "ref": "#123456789012345678901234567890",
+      "kind": "perf",
+      "what": "Handles AbstractSingletonProxyFactoryBeanConfigurationManagerImplementation when the AbstractSingletonProxyFactoryBeanConfigurationManagerImplementationFactory is ready.",
+      "why": "Handles AbstractSingletonProxyFactoryBeanConfigurationManagerImplementation when the AbstractSingletonProxyFactoryBeanConfigurationManagerImplementationFactory is ready.",
+      "risk": "Handles AbstractSingletonProxyFactoryBeanConfigurationManagerImplementation when the AbstractSingletonProxyFactoryBeanConfigurationManagerImplementationFactory is ready.",
+      "nodes": [
+        "service",
+        "queue",
+        "worker"
+      ],
+      "files": [
+        "packages/platform-services/src/modules/authentication/providers/oauth2/handlers/refreshTokenRotationHandler.ts",
+        "packages/platform-services/src/modules/authentication/providers/oauth2/handlers/refreshTokenRotationHandler.tsx"
+      ],
+      "url": "https://github.com/acme-corporation/very-long-repository-name-for-testing/pull/123456"
+    },
+    {
+      "id": "pr-479",
+      "title": "Handles AbstractSingletonProxyFactoryBeanConfigurationManagerImplementation when the AbstractSingletonProxyFactoryBeanConfigurationManagerImplementationFactory is ready.",
+      "date": "2026-10-24",
+      "author": "abstractsingletonproxyfactorybeanconfigurationmanagerimplementation",
+      "authorType": "human",
+      "ref": "#123456789012345678901234567890",
+      "kind": "feat",
+      "what": "Handles AbstractSingletonProxyFactoryBeanConfigurationManagerImplementation when the AbstractSingletonProxyFactoryBeanConfigurationManagerImplementationFactory is ready.",
+      "why": "Handles AbstractSingletonProxyFactoryBeanConfigurationManagerImplementation when the AbstractSingletonProxyFactoryBeanConfigurationManagerImplementationFactory is ready.",
+      "nodes": [
+        "billing",
+        "service",
+        "api",
+        "web"
+      ],
+      "files": [
+        "packages/platform-services/src/modules/authentication/providers/oauth2/handlers/refreshTokenRotationHandler.ts",
+        "packages/platform-services/src/modules/authentication/providers/oauth2/handlers/refreshTokenRotationHandler.tsx"
+      ],
+      "risk": "Handles AbstractSingletonProxyFactoryBeanConfigurationManagerImplementation when the AbstractSingletonProxyFactoryBeanConfigurationManagerImplementationFactory is ready.",
+      "url": "https://github.com/acme-corporation/very-long-repository-name-for-testing/pull/123456"
+    },
+    {
+      "id": "pr-475",
+      "title": "Handles AbstractSingletonProxyFactoryBeanConfigurationManagerImplementation when the AbstractSingletonProxyFactoryBeanConfigurationManagerImplementationFactory is ready.",
+      "date": "2026-10-23",
+      "author": "abstractsingletonproxyfactorybeanconfigurationmanagerimplementation",
+      "authorType": "agent",
+      "ref": "#123456789012345678901234567890",
+      "kind": "security",
+      "what": "Handles AbstractSingletonProxyFactoryBeanConfigurationManagerImplementation when the AbstractSingletonProxyFactoryBeanConfigurationManagerImplementationFactory is ready.",
+      "why": "Handles AbstractSingletonProxyFactoryBeanConfigurationManagerImplementation when the AbstractSingletonProxyFactoryBeanConfigurationManagerImplementationFactory is ready.",
+      "nodes": [
+        "stripe",
+        "billing"
+      ],
+      "files": [
+        "packages/platform-services/src/modules/authentication/providers/oauth2/handlers/refreshTokenRotationHandler.ts",
+        "packages/platform-services/src/modules/authentication/providers/oauth2/handlers/refreshTokenRotationHandler.tsx"
+      ],
+      "risk": "Handles AbstractSingletonProxyFactoryBeanConfigurationManagerImplementation when the AbstractSingletonProxyFactoryBeanConfigurationManagerImplementationFactory is ready.",
+      "url": "https://github.com/acme-corporation/very-long-repository-name-for-testing/pull/123456"
+    },
+    {
+      "id": "pr-471",
+      "title": "Handles AbstractSingletonProxyFactoryBeanConfigurationManagerImplementation when the AbstractSingletonProxyFactoryBeanConfigurationManagerImplementationFactory is ready.",
+      "date": "2026-10-22",
+      "author": "abstractsingletonproxyfactorybeanconfigurationmanagerimplementation",
+      "authorType": "agent",
+      "ref": "#123456789012345678901234567890",
+      "kind": "refactor",
+      "what": "Handles AbstractSingletonProxyFactoryBeanConfigurationManagerImplementation when the AbstractSingletonProxyFactoryBeanConfigurationManagerImplementationFactory is ready.",
+      "why": "Handles AbstractSingletonProxyFactoryBeanConfigurationManagerImplementation when the AbstractSingletonProxyFactoryBeanConfigurationManagerImplementationFactory is ready.",
+      "nodes": [
+        "middleware",
+        "api"
+      ],
+      "files": [
+        "packages/platform-services/src/modules/authentication/providers/oauth2/handlers/refreshTokenRotationHandler.ts",
+        "packages/platform-services/src/modules/authentication/providers/oauth2/handlers/refreshTokenRotationHandler.tsx"
+      ],
+      "risk": "Handles AbstractSingletonProxyFactoryBeanConfigurationManagerImplementation when the AbstractSingletonProxyFactoryBeanConfigurationManagerImplementationFactory is ready.",
+      "url": "https://github.com/acme-corporation/very-long-repository-name-for-testing/pull/123456"
+    }
+  ],
+  "tree": [
+    {
+      "path": "apps/",
+      "note": "Things you can run"
+    },
+    {
+      "path": "apps/web/",
+      "note": "The Next.js app: pages, components and API routes",
+      "key": true
+    },
+    {
+      "path": "apps/web/app/api/",
+      "note": "HTTP endpoints. Thin: validate, then call packages/core"
+    },
+    {
+      "path": "apps/web/middleware.ts",
+      "note": "Auth for every request"
+    },
+    {
+      "path": "apps/worker/",
+      "note": "Background job runner (emails, webhooks, stats)"
+    },
+    {
+      "path": "packages/",
+      "note": "Shared code, no HTTP in here"
+    },
+    {
+      "path": "packages/core/",
+      "note": "Business rules. Start here to change behaviour",
+      "key": true
+    },
+    {
+      "path": "packages/db/",
+      "note": "Prisma schema and migrations"
+    },
+    {
+      "path": "packages/platform-services/src/modules/authentication/providers/oauth2/handlers/refreshTokenRotationHandler.ts",
+      "note": "Handles AbstractSingletonProxyFactoryBeanConfigurationManagerImplementation when the AbstractSingletonProxyFactoryBeanConfigurationManagerImplementationFactory is ready.",
+      "key": true
+    },
+    {
+      "path": "apps/AbstractSingletonProxyFactoryBeanConfigurationManagerImplementation/",
+      "note": "AbstractSingletonProxyFactoryBeanConfigurationManagerImplementation"
+    }
+  ],
+  "dataModel": [
+    {
+      "name": "AbstractSingletonProxyFactoryBeanConfigurationManagerImplementation",
+      "summary": "Handles AbstractSingletonProxyFactoryBeanConfigurationManagerImplementation when the AbstractSingletonProxyFactoryBeanConfigurationManagerImplementationFactory is ready.",
+      "fields": [
+        {
+          "name": "id",
+          "type": "uuid"
+        },
+        {
+          "name": "name",
+          "type": "text"
+        },
+        {
+          "name": "plan",
+          "type": "'free' | 'pro'",
+          "note": "Synced from Stripe"
+        },
+        {
+          "name": "stripeCustomerId",
+          "type": "text?"
+        },
+        {
+          "name": "stripeAbstractSingletonProxyFactoryBeanConfigurationManagerImplementationId",
+          "type": "'pending' | 'active' | 'past_due' | 'cancelled' | 'incomplete_expired' | 'AbstractSingletonProxyFactoryBeanConfigurationManagerImplementation'",
+          "note": "Handles AbstractSingletonProxyFactoryBeanConfigurationManagerImplementation when the AbstractSingletonProxyFactoryBeanConfigurationManagerImplementationFactory is ready."
+        }
+      ],
+      "relations": [
+        {
+          "to": "User",
+          "kind": "has many"
+        },
+        {
+          "to": "Task",
+          "kind": "has many"
+        }
+      ]
+    },
+    {
+      "name": "User",
+      "fields": [
+        {
+          "name": "id",
+          "type": "uuid"
+        },
+        {
+          "name": "email",
+          "type": "text",
+          "note": "Unique"
+        },
+        {
+          "name": "teamId",
+          "type": "uuid"
+        }
+      ],
+      "relations": [
+        {
+          "to": "AbstractSingletonProxyFactoryBeanConfigurationManagerImplementation",
+          "kind": "belongs to"
+        }
+      ]
+    },
+    {
+      "name": "Task",
+      "summary": "The thing people actually care about.",
+      "fields": [
+        {
+          "name": "id",
+          "type": "uuid"
+        },
+        {
+          "name": "title",
+          "type": "text"
+        },
+        {
+          "name": "status",
+          "type": "'open' | 'done'"
+        },
+        {
+          "name": "assigneeId",
+          "type": "uuid?",
+          "ref": "User"
+        },
+        {
+          "name": "completedAt",
+          "type": "timestamptz?",
+          "note": "Set by the service, never by the client"
+        }
+      ],
+      "relations": [
+        {
+          "to": "AbstractSingletonProxyFactoryBeanConfigurationManagerImplementation",
+          "kind": "belongs to"
+        },
+        {
+          "to": "User",
+          "kind": "assigned to"
+        }
+      ]
+    }
+  ],
+  "concepts": [
+    {
+      "title": "Routes are thin, the service is thick AbstractSingletonProxyFactoryBeanConfigurationManagerImplementation",
+      "body": "Handles AbstractSingletonProxyFactoryBeanConfigurationManagerImplementation when the AbstractSingletonProxyFactoryBeanConfigurationManagerImplementationFactory is ready.",
+      "analogy": "Handles AbstractSingletonProxyFactoryBeanConfigurationManagerImplementation when the AbstractSingletonProxyFactoryBeanConfigurationManagerImplementationFactory is ready.",
+      "file": "packages/platform-services/src/modules/authentication/providers/oauth2/handlers/refreshTokenRotationHandler.ts"
+    },
+    {
+      "title": "Slow things go on the queue AbstractSingletonProxyFactoryBeanConfigurationManagerImplementation",
+      "body": "Handles AbstractSingletonProxyFactoryBeanConfigurationManagerImplementation when the AbstractSingletonProxyFactoryBeanConfigurationManagerImplementationFactory is ready.",
+      "analogy": "Handles AbstractSingletonProxyFactoryBeanConfigurationManagerImplementation when the AbstractSingletonProxyFactoryBeanConfigurationManagerImplementationFactory is ready.",
+      "code": "await queue.add('task.assigned', { taskId: task.id })",
+      "lang": "ts",
+      "file": "packages/platform-services/src/modules/authentication/providers/oauth2/handlers/refreshTokenRotationHandler.ts"
+    },
+    {
+      "title": "Optimistic UI AbstractSingletonProxyFactoryBeanConfigurationManagerImplementation",
+      "body": "Handles AbstractSingletonProxyFactoryBeanConfigurationManagerImplementation when the AbstractSingletonProxyFactoryBeanConfigurationManagerImplementationFactory is ready.",
+      "file": "packages/platform-services/src/modules/authentication/providers/oauth2/handlers/refreshTokenRotationHandler.ts",
+      "analogy": "Handles AbstractSingletonProxyFactoryBeanConfigurationManagerImplementation when the AbstractSingletonProxyFactoryBeanConfigurationManagerImplementationFactory is ready."
+    }
+  ],
+  "quiz": [
+    {
+      "question": "Handles AbstractSingletonProxyFactoryBeanConfigurationManagerImplementation when the AbstractSingletonProxyFactoryBeanConfigurationManagerImplementationFactory is ready.?",
+      "options": [
+        "packages/platform-services/src/modules/authentication/providers/oauth2/handlers/refreshTokenRotationHandler.ts",
+        "packages/core/src/tasks/service.ts",
+        "apps/web/middleware.ts",
+        "The Prisma schema"
+      ],
+      "answer": 1,
+      "explain": "Handles AbstractSingletonProxyFactoryBeanConfigurationManagerImplementation when the AbstractSingletonProxyFactoryBeanConfigurationManagerImplementationFactory is ready."
+    },
+    {
+      "question": "Why doesn\u2019t creating a task wait for the email to send?",
+      "options": [
+        "Emails are sent by the browser",
+        "The email is queued and the worker sends it later",
+        "Emails are only sent on Pro plans"
+      ],
+      "answer": 1,
+      "explain": "PR #482 moved emails onto the queue, which cut p95 from 1.8 s to 90 ms."
+    },
+    {
+      "question": "What stops someone faking a Stripe \u2018payment succeeded\u2019 event?",
+      "options": [
+        "The auth middleware",
+        "Rate limiting",
+        "Webhook signature verification"
+      ],
+      "answer": 2,
+      "explain": "Added in #475 after an audit. The middleware doesn\u2019t run for Stripe, because Stripe has no session cookie."
+    }
+  ],
+  "glossary": [
+    {
+      "term": "Optimistic update",
+      "definition": "Showing a change in the UI before the server confirms it."
+    },
+    {
+      "term": "Job",
+      "definition": "A unit of background work stored in Redis and run by the worker."
+    },
+    {
+      "term": "Plan limit",
+      "definition": "The 50-open-task cap on free teams, enforced in billing/limits.ts."
+    },
+    {
+      "term": "Idempotent",
+      "definition": "Safe to run twice: the second run changes nothing."
+    },
+    {
+      "term": "AbstractSingletonProxyFactoryBeanConfigurationManagerImplementation",
+      "definition": "Handles AbstractSingletonProxyFactoryBeanConfigurationManagerImplementation when the AbstractSingletonProxyFactoryBeanConfigurationManagerImplementationFactory is ready."
+    },
+    {
+      "term": "x",
+      "definition": "packages/platform-services/src/modules/authentication/providers/oauth2/handlers/refreshTokenRotationHandler.ts https://github.com/acme-corporation/very-long-repository-name-for-testing/pull/123456"
+    }
+  ],
+  "runbook": [
+    {
+      "label": "Install",
+      "command": "pnpm install"
+    },
+    {
+      "label": "Start Postgres and Redis",
+      "command": "docker compose up -d db redis",
+      "note": "Needs Docker Desktop running."
+    },
+    {
+      "label": "Run the app and the worker",
+      "command": "pnpm dev",
+      "note": "Web on :3000, worker logs in the same terminal."
+    },
+    {
+      "label": "AbstractSingletonProxyFactoryBeanConfigurationManagerImplementation",
+      "command": "pnpm --filter @scope/abstractsingletonproxyfactorybeanconfigurationmanagerimplementation run AbstractSingletonProxyFactoryBeanConfigurationManagerImplementation --config=packages/platform-services/src/modules/authentication/providers/oauth2/handlers/refreshTokenRotationHandler.ts",
+      "note": "Handles AbstractSingletonProxyFactoryBeanConfigurationManagerImplementation when the AbstractSingletonProxyFactoryBeanConfigurationManagerImplementationFactory is ready."
+    }
+  ]
+}

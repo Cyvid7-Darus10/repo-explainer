@@ -59,3 +59,16 @@ test('links from data go through the http(s) allowlist', () => {
   assert.doesNotMatch(js, /href: change\.url/);
   assert.match(js, /href: safeUrl\(/);
 });
+
+// Overflow guardrails. Long identifiers and paths must wrap inside their box;
+// test/fixtures/stress.explainer.json is the visual check for this.
+test('long words wrap instead of stretching their box', () => {
+  assert.match(css, /body \{[^}]*overflow-wrap: break-word;/);
+});
+
+test('grid tracks can shrink below their longest word', () => {
+  const bare = [...css.matchAll(/grid-template-columns:\s*([^;]+);/g)]
+    .map((m) => m[1])
+    .filter((value) => /(^|[\s(,])1fr/.test(value.replace(/minmax\([^)]*\)/g, '')));
+  assert.deepEqual(bare, [], `use minmax(0, 1fr) instead of 1fr: ${bare.join(' | ')}`);
+});

@@ -7,3 +7,4 @@ node_modules/
 /.playwright-mcp/
 coverage/
 !test/fixtures/**/node_modules/
+/examples/.stress.html

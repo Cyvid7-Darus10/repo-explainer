@@ -71,6 +71,12 @@ function safeUrl(value) {
   return typeof value === 'string' && /^https?:\/\//i.test(value.trim()) ? value.trim() : null;
 }
 
+// A path with soft break points after each "/", so it wraps at folder
+// boundaries. <wbr> adds no characters, so copying gives the exact path.
+function breakablePath(path) {
+  return String(path).split(/(?<=\/)/).flatMap((part, i) => (i ? [h('wbr'), part] : [part]));
+}
+
 function fileChip(path) {
   return h('span', { class: 'chip chip-file', title: path }, path);
 }

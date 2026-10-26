@@ -86,7 +86,7 @@ function renderTree(data, mount) {
     const depth = String(entry.path).replace(/\/$/, '').split('/').length - 1;
     const isDir = String(entry.path).endsWith('/');
     return h('li', { class: entry.key ? 'is-key' : '' },
-      h('span', { class: 'path', style: `padding-left:${depth * 18}px` }, icon(isDir ? 'folder' : 'file'), entry.path),
+      h('span', { class: 'path', style: `padding-left:${Math.min(depth, 4) * 18}px` }, icon(isDir ? 'folder' : 'file'), h('span', { class: 'path-text' }, breakablePath(entry.path))),
       h('span', { class: 'note' }, text(entry.note)));
   }))));
 }
