@@ -1,6 +1,6 @@
 ---
 name: repo-explainer
-description: Turn a codebase into a guided, interactive HTML tour: architecture map, step-through end-to-end flows with file:line citations, data model, and a "what changed and why" timeline of recent human and agent merges. Use when someone asks to explain, onboard onto, map, document, or catch up on a repository (backend, frontend, full-stack, mobile, library or CLI), or to show how a request flows end to end.
+description: 'Turn a codebase into a guided, interactive HTML tour: architecture map, step-through end-to-end flows with file:line citations, data model, and a "what changed and why" timeline of recent human and agent merges. Use when someone asks to explain, onboard onto, map, document, or catch up on a repository (backend, frontend, full-stack, mobile, library or CLI), or to show how a request flows end to end.'
 ---
 
 # Repo Explainer
